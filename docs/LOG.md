@@ -1,5 +1,12 @@
 # Log
 
+## 2026-10-23: Storm turned off
+Request: turn the storm off completely (disable, don't delete), hide the storm HUD, check base, test area and battles, no knockout after battle.
+- Disabled RoundServer, HealthServer, StormClient, ShieldClient. HealthHud hides siren, zone, health bar and bag (SHOW_STORM_HUD = false).
+- Play test: base loads, test area clear and safe, battle works, no knockout 8s after the battle. SpiritServer now idles (waits for the round clock).
+- Files: HealthHud, new .meta.json files in src/ recording the disabled scripts, docs. Game objects: 4 scripts Enabled = false.
+- Open: decide whether to remove the storm for good. Don to press Ctrl+S.
+
 ## 2026-10-23: Camera back, real win and real tame
 Request: move the battle camera back, win a real battle showing effects, tame with the normal roll, screenshots of each.
 - Camera now further back, FOV 40; both spirits fully in view and closer in size.

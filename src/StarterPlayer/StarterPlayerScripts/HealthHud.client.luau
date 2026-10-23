@@ -87,6 +87,13 @@ local toast = label("Toast", UDim2.fromOffset(420, 34), UDim2.new(0.5, 0, 0.62, 
 toast.TextTransparency = 1
 toast.TextStrokeTransparency = 1
 local toastT = 0
+
+-- Storm turned off 2026-10-23: hide the storm-era pieces (siren timer, zone label, health bar, bag). Cash and toasts stay.
+-- Set SHOW_STORM_HUD = true to bring them back.
+local SHOW_STORM_HUD = false
+if not SHOW_STORM_HUD then
+	timer.Visible = false; zoneLabel.Visible = false; barBack.Visible = false; bagLabel.Visible = false
+end
 local lastCatch = player:GetAttribute("LastCatch")
 local lastDeliver = player:GetAttribute("LastDeliver")
 

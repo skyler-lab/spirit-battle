@@ -33,7 +33,7 @@ Reference game: "Catch a Brainrot". Copy its mechanics, pacing, flow and layout 
 ## How it is built
 Battle (the new game, built and partly tested):
 - `ReplicatedStorage.BattleData`: the one rule set. MaxEnergy 10, StartEnergy 1, +1 energy per turn each side. Moves: Charge (free, +2 energy), Strike (cost 2, 20 dmg), Block (cost 1, cancels one attack, refunds cost when it blocks), Blast (cost 5, 45 dmg). Tame (placeholders): works at or below 30% wild health; chance 25% at 30% health rising linearly to 90% near 0; `D.tameChance(hp, max)`; owned list cap 60. Test spirits Wood=Nature, Ember=Fire, Pebble=Earth, Breeze=Wind, 100 HP each. Elements: Fire>Nature>Earth>Wind>Fire, Water>Fire; 1.5x strong, 0.5x weak. EventTime table keeps server and client in step. All numbers are placeholders.
-- `ServerScriptService.BattleServer`: spawns wild spirits on `Workspace.TestArea` WildSpot parts (Species attribute). Walk within 9 studs: "!" for 0.9s, player frozen, battle starts. Server-authoritative turns, random foe AI, arena built per player far away (4000+, 300, 4000) as a Persistent Model. Remotes in `ReplicatedStorage.BattleRemotes` (Start, Events, End, Move). Win: wild despawns, respawns after 8s. Lose or run: 4s cooldown. Placeholder rules: double knockout is a player win; losing sends you to spawn with no penalty. Player's spirit is the player attribute BattleSpirit, default Wood. Sets player attribute InBattle while a battle runs; HealthServer skips storm damage while it is set. TAME (move id "Tame"): server rejects it above the threshold; a failed try uses your turn and the wild spirit still acts; a success ends the battle ("You tamed X!"), removes the wild spirit like a win and appends its name to the player attribute OwnedSpirits. Studio-only test hooks (Workspace attributes, ignored outside Studio): TestFoeHpFrac (0 to 1, wild starting health) and TestTameForce ("success" or "fail"). Teleport pads: part with a ProximityPrompt and a Dest attribute.
+- `ServerScriptService.BattleServer`: spawns wild spirits on `Workspace.TestArea` WildSpot parts (Species attribute). Walk within 9 studs: "!" for 0.9s, player frozen, battle starts. Server-authoritative turns, random foe AI, arena built per player far away (4000+, 300, 4000) as a Persistent Model. Remotes in `ReplicatedStorage.BattleRemotes` (Start, Events, End, Move). Win: wild despawns, respawns after 8s. Lose or run: 4s cooldown. Placeholder rules: double knockout is a player win; losing sends you to spawn with no penalty. Player's spirit is the player attribute BattleSpirit, default Wood. Sets player attribute InBattle while a battle runs (HealthServer, now disabled, skipped storm damage while it was set). TAME (move id "Tame"): server rejects it above the threshold; a failed try uses your turn and the wild spirit still acts; a success ends the battle ("You tamed X!"), removes the wild spirit like a win and appends its name to the player attribute OwnedSpirits. Studio-only test hooks (Workspace attributes, ignored outside Studio): TestFoeHpFrac (0 to 1, wild starting health) and TestTameForce ("success" or "fail"). Teleport pads: part with a ProximityPrompt and a Dest attribute.
 - `StarterPlayerScripts.BattleClient`: plain placeholder battle UI (foe panel, your panel with energy, message bars, FIGHT / BAG(soon) / TEAM(soon) / RUN, move page with costs, TAME button under the menu showing the live chance or "needs 30% HP or less"), fade, scripted camera (well behind and to the side of your spirit so both look closer in size, distances scale with the gap, FOV 40 in battle and restored after), simple effects, hides other HUDs during battle, uses RequestStreamAsync. Does NOT use BattleFXPack yet.
 - `ReplicatedStorage.BattleFXPack` (folder, v0.2, 2026-10-22, from the look-and-feel pass): asset-free battle presentation built from Parts in code. Modules: FX (effects), Moves (ability library), BattleCamera (shots), BattleDialog (typewriter dialog, toasts, energy pops, team XP, level-up), BattleMenu, BattlePlay, Sequencer (Entry, SendOut, Turn, Faint, Catch, Swap, Exit), README, Demo. Everything runs on the client. Not wired into BattleClient.
 - `StarterPlayerScripts.Demo`: identical copy of BattleFXPack.Demo. DISABLED 2026-10-23 (Enabled = false, not deleted) because its arena, camera and dialog covered the real battle. The Enabled flag lives only in the place file, not in `src/`.
@@ -47,7 +47,16 @@ Base and spirits (keepers):
 - `StarterPlayerScripts.OwnedSpiritsClient`: TEMPORARY plain "My spirits (N)" list on the left edge, from OwnedSpirits. Hidden during battles.
 - `ReplicatedStorage.UiArt`: empty placeholders for UI images.
 
-Storm era (still in the place, expected to go under the pivot):
+Storm: TURNED OFF 2026-10-23 at Don's request (disabled, nothing deleted). To turn it back on:
+- `ServerScriptService.RoundServer` Enabled = false (round clock, RoundStart/RoundNumber). Set Enabled = true.
+- `ServerScriptService.HealthServer` Enabled = false (storm damage, health refill, knockout). Set Enabled = true.
+- `StarterPlayerScripts.StormClient` Enabled = false (rain, darkness, storm visuals). Set Enabled = true.
+- `StarterPlayerScripts.ShieldClient` Enabled = false (storm shield button). Set Enabled = true.
+- `StarterPlayerScripts.HealthHud`: `SHOW_STORM_HUD = false` hides the siren timer, zone label, health bar and bag. Set it to true. Cash, rate and toasts still show.
+- Side effect: `SpiritServer` (old grab-and-deliver spirits) is still enabled but now idles forever, because it waits for RoundStart. It spawns nothing.
+- The Enabled flags live in the place file; `src/` records them as `<Script>.meta.json` files with `"Enabled": false` (Demo too).
+
+Storm era scripts (in the place, expected to go under the pivot):
 - `RoundServer` (5-minute round clock), `StormController` + `StormClient` (storm visuals and levels), `ZoneConfig` (ring zones and hub), `HealthServer` (storm damage, knockout), `SpiritServer` (spawns spirits by zone, bag pickup, delivery), `FollowClient` (spirits follow you), `SpeedServer` (walk speed and SpeedMult), `CoilServer` + `CoilWear` + `CoilData` + `CoilModels` (speed coils), `ShieldClient` (storm shield button), `HealthHud` (old HUD: siren timer, zone, health bar, bag, cash), `DevShowcase` (temporary showcase spirits at spawn, on while Workspace attribute DevShowcase is true).
 
 Place contents (Studio, 2026-10-23): Workspace has Baseplate, SpawnLocation at (0, 4.65, -70), `GreyBox` (111 parts: the grey-cube home base with 6 plots and CenterShop), `TestArea` (Ground 160x160 at (600,0,0), 4 WildSpot parts, ReturnPad), `TestPortal` (ToTestArea pad near spawn), and `EV_Ground` plus `EV_F1` to `EV_F5` (no script references them; origin unknown, probably left by the FX demo or an evaluation). StreamingEnabled is on. StarterGui is empty (all UI is built by scripts). ServerStorage holds only TryDeliver.
@@ -59,22 +68,21 @@ Place contents (Studio, 2026-10-23): Workspace has Baseplate, SpawnLocation at (
 - Battle camera moved further back 2026-10-23 (Wood vs Breeze): both fully in view and closer in size (Wood still a bit larger; its model is taller). RUN tested: battle ends, camera and FOV return to normal.
 - Real battles with no test switches, 2026-10-23: won against Pebble (Strike shots visible mid-flight as a small green ball, "It's super effective!", "Pebble was defeated!"); tamed Pebble with the normal random roll (68% chance at 10 HP, succeeded first try), list showed Pebble.
 - Effects are visible but small and faint. Damage numbers were not seen in screenshots. A win has no faint or reward effect: the foe just stays until the battle closes.
-- Storm problem found 2026-10-23: the test area is storm zone 4. Before the fix, storm damage knocked the player out mid-battle. Now damage is paused during a battle (health held steady over 4s), but right after a battle ends the player stands in the storm and is knocked out to base in about 4s. The storm's rain and darkness also show inside the battle arena.
+- Storm off, checked in Play 2026-10-23: home base loads (plot, save data, cash HUD, spirits list), no siren or health bar; test area has clear sky and no damage (6s, no knockout); battle works (low-energy reject, Charge, Strike, RUN); 8s after the battle the player is still in the test area, no knockout. No errors from game scripts.
 - Placeholder orbs (Pebble, Ember) are neon, so Pebble's brown reads bright yellow, and the orb floats beside its platform.
 
 ## Open tasks (priority order)
-1. Storm vs test area: after every battle the player is knocked out by the storm. Ask Don: make the test area safe, or turn the storm off (open question: keep or remove the storm).
-2. Ask Don what to do with the EV_ parts in Workspace. Placeholder orbs look odd (neon, floating); fine until real models exist.
-3. Wire BattleFXPack into BattleClient (or replace BattleClient's placeholder effects with the pack) and test win, RUN and visible effects.
-4. Pick which owned spirit fights (BattleSpirit is still always Wood) and a real team/inventory UI.
-5. Place tamed spirits on the home base (replace the storm-era delivery path).
-6. Home base as a real map (now grey cubes). Plan the look and what "home customizing" means.
-7. Remove or retire the storm-era scripts and the old HUD once nothing depends on them. Do not delete without Don's OK.
-8. Fire island, then more islands and the world map.
-9. Later: shops and items (economy first, then prices), evolution, friendly battles, customizing, rebirth, tutorial, real UI and art, publish and real DataStore test.
+1. Ask Don what to do with the EV_ parts in Workspace. Placeholder orbs look odd (neon, floating); fine until real models exist.
+2. Wire BattleFXPack into BattleClient (or replace BattleClient's placeholder effects with the pack) and test win, RUN and visible effects.
+3. Pick which owned spirit fights (BattleSpirit is still always Wood) and a real team/inventory UI.
+4. Place tamed spirits on the home base (replace the storm-era delivery path).
+5. Home base as a real map (now grey cubes). Plan the look and what "home customizing" means.
+6. Remove or retire the storm-era scripts and the old HUD once nothing depends on them. Do not delete without Don's OK.
+7. Fire island, then more islands and the world map.
+8. Later: shops and items (economy first, then prices), evolution, friendly battles, customizing, rebirth, tutorial, real UI and art, publish and real DataStore test.
 
 ## Open questions (unanswered)
-Final name; teleport vs guided travel on the world map; what "home customizing" means; how finished the home base must be before battles; how many spirits per battle; does a wild spirit fight back and what is the taming chance; keep or remove the storm; how many elements.
+Final name; teleport vs guided travel on the world map; what "home customizing" means; how finished the home base must be before battles; how many spirits per battle; does a wild spirit fight back and what is the taming chance; remove the storm for good (it is off for now); how many elements.
 
 ## Technical notes
 - Studio MCP: call list_roblox_studios first, studio_id on every call. Edit datamodel is unavailable during Play; stop Play first. Server calls time out around 60s. screen_capture works in Play.
