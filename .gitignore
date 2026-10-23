@@ -3,3 +3,4 @@
 *_AutoRecovery_*.rbxl
 .DS_Store
 Thumbs.db
+.claude/settings.local.json
