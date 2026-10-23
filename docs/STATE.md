@@ -11,7 +11,7 @@ Reference game: "Catch a Brainrot". Copy its mechanics, pacing, flow and layout 
 
 ## Where the work is
 - Project folder: `C:\Users\80hsd\RobloxGames\SpiritBattle` (git, branch main).
-- GitHub: not yet created (see LOG).
+- GitHub: https://github.com/skyler-lab/spirit-battle (private, account skyler-lab). Push after every commit so Codex sees the latest.
 - Place file: `C:\Users\80hsd\OneDrive\Documents\ChatGPT\Roblox team\work\Place1.rbxl`. Opened in Studio as "Place1.rbxl". Parts, models and attributes live only in the place. Don saves it with Ctrl+S; the on-disk copy was last saved 2026-10-20.
 - That `Roblox team` folder also holds the vacuum game files. Never touch the vacuum place or VACUUM_SAFETY_COPY.
 - Scripts: `src/` holds all 36 scripts, exported from Studio on 2026-10-22, byte-identical to Studio as of 2026-10-23. Rojo naming (`.server.luau`, `.client.luau`, `.luau`) but no Rojo project yet. Studio is the live source: after a Studio edit, copy the script back to `src/` and commit.

@@ -6,7 +6,8 @@ Request: add docs/STATE.md and docs/LOG.md in the vacuum game format, add the af
 - Wrote docs/STATE.md and docs/LOG.md, added section 8 to CLAUDE.md.
 - Secret scan of the repo: clean. Only the word "Secret" (a rarity) and the key file path in CLAUDE.md, no credentials.
 - Files: CLAUDE.md, docs/STATE.md, docs/LOG.md. No game objects changed.
-- Open: GitHub repo creation and push need Don's GitHub sign-in in the GitHub CLI.
+- Don created https://github.com/skyler-lab/spirit-battle (private) on github.com; GitHub CLI sign-in did not complete.
+- Open: Don runs the first push himself (Claude is blocked from adding a remote). Codex still needs access to the repo.
 
 ## 2026-10-22: Project folder, git and script export
 Request: read the handoff as CLAUDE.md, check the Studio connection, set up git, export all Place1 scripts as files, change no game code.
