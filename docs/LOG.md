@@ -1,5 +1,12 @@
 # Log
 
+## 2026-10-23: Disable the FX Demo, re-check battle view
+Request: disable the FX Demo LocalScript (don't delete it) and screenshot the real battle view.
+- Set StarterPlayerScripts.Demo Enabled = false. The script is still there.
+- Play test: the real battle now shows with no Demo arena or dialog. Wood fills the foreground; Pebble is a yellow-looking placeholder orb far away.
+- Files: docs only. Game object changed: Demo.Enabled. Test attribute cleared.
+- Open: battle camera framing; foe orb looks like a sun. Don to press Ctrl+S.
+
 ## 2026-10-23: Taming
 Request: add TAME to the battle (works at 30% health or less, lower health = better chance), save tamed spirits, show an owned list, test fail, success and rejoin.
 - Studio matched STATE.md before starting. Added tame numbers and tameChance to BattleData, the TAME turn to BattleServer, owned-spirit saving to BaseServer, a TAME button to BattleClient, new OwnedSpiritsClient list.
