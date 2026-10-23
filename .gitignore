@@ -1,0 +1,5 @@
+*.rbxl.lock
+*.rbxlx.lock
+*_AutoRecovery_*.rbxl
+.DS_Store
+Thumbs.db
