@@ -41,7 +41,26 @@ D.ElementColor = {
 }
 
 -- seconds each event type takes to play (server and client both use this so they stay in step)
-D.EventTime = { say = 1.3, fx = 0.9, hit = 1.0, blocked = 0.9, en = 0.35, reject = 0.4, ["end"] = 0.4 }
+D.EventTime = { say = 1.3, fx = 0.9, hit = 1.0, blocked = 0.9, en = 0.35, reject = 0.4, ["end"] = 0.4, tame = 1.4 }
+
+-- Taming (PLACEHOLDERS). TAME only works when the wild spirit's health is at or below Threshold (fraction of max).
+-- Chance scales linearly from ChanceAtThreshold (at exactly Threshold) up to ChanceAtZero (as health nears 0).
+-- A failed try uses your turn: the wild spirit still makes its move.
+D.Tame = {
+	Threshold = 0.30,
+	ChanceAtThreshold = 0.25,
+	ChanceAtZero = 0.90,
+	MaxOwned = 60, -- cap on the saved owned-spirits list
+}
+
+-- 0 when the wild spirit is too healthy to tame, otherwise the success chance (0 to 1)
+function D.tameChance(hp, maxHp)
+	if not hp or not maxHp or maxHp <= 0 then return 0 end
+	local frac = hp / maxHp
+	if frac > D.Tame.Threshold then return 0 end
+	local t = math.clamp(frac / D.Tame.Threshold, 0, 1)
+	return D.Tame.ChanceAtZero + (D.Tame.ChanceAtThreshold - D.Tame.ChanceAtZero) * t
+end
 
 function D.multiplier(attEl, defEl)
 	local s = D.Strong[attEl]

@@ -1,5 +1,13 @@
 # Log
 
+## 2026-10-23: Taming
+Request: add TAME to the battle (works at 30% health or less, lower health = better chance), save tamed spirits, show an owned list, test fail, success and rejoin.
+- Studio matched STATE.md before starting. Added tame numbers and tameChance to BattleData, the TAME turn to BattleServer, owned-spirit saving to BaseServer, a TAME button to BattleClient, new OwnedSpiritsClient list.
+- Tested in Play with Studio-only hooks: fail used the turn, success said "You tamed Pebble!", list showed Pebble, still there after TestRejoin.
+- Found: the enabled FX Demo's camera and dialog cover the real battle.
+- Files: BattleData, BattleServer, BaseServer, BattleClient, OwnedSpiritsClient (new), docs. Workspace test attributes cleared.
+- Open: disable the Demo (needs Don's OK); choose which owned spirit fights; the unforced random roll is untested. Don to press Ctrl+S.
+
 ## 2026-10-23: Docs for Codex and private GitHub repo
 Request: add docs/STATE.md and docs/LOG.md in the vacuum game format, add the after-every-task rule to CLAUDE.md, check for secrets, create a private GitHub repo and push, explain how to connect Codex.
 - Checked Studio: all 36 scripts still match src/ byte for byte. Found that StarterPlayerScripts.Demo (FX demo) is enabled and BattleClient does not use BattleFXPack yet; recorded both in STATE.md.

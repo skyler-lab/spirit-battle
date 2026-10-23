@@ -182,6 +182,7 @@ local function saveData(plr)
 			slots = plr:GetAttribute("UpSlots") or 0, income = plr:GetAttribute("UpIncome") or 0 },
 		coils = plr:GetAttribute("CoilsOwned") or "",
 		shields = plr:GetAttribute("Shields") or 0,
+		owned = plr:GetAttribute("OwnedSpirits") or "",  -- tamed spirits, ";"-separated names
 	}
 	for attempt = 1, 3 do
 		local ok, err = pcall(function() store:SetAsync(keyOf(plr), payload) end)
@@ -209,6 +210,7 @@ local function assign(plr)
 			plr:SetAttribute("CoilsOwned", "")
 			plr:SetAttribute("Shields", 0)
 			plr:SetAttribute("ShieldUntil", 0)
+			plr:SetAttribute("OwnedSpirits", "")
 			if ok and type(data) == "table" then
 				plr:SetAttribute("Cash", tonumber(data.cash) or 0)
 				local u = type(data.up) == "table" and data.up or {}
@@ -218,6 +220,7 @@ local function assign(plr)
 				plr:SetAttribute("UpIncome", math.clamp(tonumber(u.income) or 0, 0, Up.ById.Income.maxLevel))
 				plr:SetAttribute("CoilsOwned", type(data.coils) == "string" and data.coils or "")
 				plr:SetAttribute("Shields", math.clamp(tonumber(data.shields) or 0, 0, Up.Items.Shield.max))
+				plr:SetAttribute("OwnedSpirits", type(data.owned) == "string" and data.owned or "")
 				for _, it in ipairs(data.slots or {}) do
 					if Data.RarityCash[it.rarity] then
 						for k = 1, slotCount(plr) do

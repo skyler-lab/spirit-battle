@@ -1,6 +1,6 @@
 # Spirit Battle: current state
 
-Last updated: 2026-10-23
+Last updated: 2026-10-23 (taming added)
 
 ## What it is
 Roblox Prodigy-style spirit battle game. Working name "Spirit Battle", final name TBD. "Storm Spirits" is the old name and the old design (5-minute storm rounds, grab spirits, deliver to base); that design is dropped. Owner: Don (Roblox user SkylerH007). Not published. Halloween 2026 target.
@@ -14,7 +14,7 @@ Reference game: "Catch a Brainrot". Copy its mechanics, pacing, flow and layout 
 - GitHub: https://github.com/skyler-lab/spirit-battle (private, account skyler-lab). Push after every commit so Codex sees the latest.
 - Place file: `C:\Users\80hsd\OneDrive\Documents\ChatGPT\Roblox team\work\Place1.rbxl`. Opened in Studio as "Place1.rbxl". Parts, models and attributes live only in the place. Don saves it with Ctrl+S; the on-disk copy was last saved 2026-10-20.
 - That `Roblox team` folder also holds the vacuum game files. Never touch the vacuum place or VACUUM_SAFETY_COPY.
-- Scripts: `src/` holds all 36 scripts, exported from Studio on 2026-10-22, byte-identical to Studio as of 2026-10-23. Rojo naming (`.server.luau`, `.client.luau`, `.luau`) but no Rojo project yet. Studio is the live source: after a Studio edit, copy the script back to `src/` and commit.
+- Scripts: `src/` holds all 37 scripts, byte-identical to Studio as of 2026-10-23 (after taming). Rojo naming (`.server.luau`, `.client.luau`, `.luau`) but no Rojo project yet. Studio is the live source: after a Studio edit, copy the script back to `src/` and commit.
 - HttpService is off in the place. Scripts were pulled through the Studio MCP, not over HTTP.
 - Plan doc: "Spirit Battle Game: Plan v1" https://claude.ai/code/artifact/119942b6-e1b7-4543-bf62-923a6f8c9055
 
@@ -32,18 +32,19 @@ Reference game: "Catch a Brainrot". Copy its mechanics, pacing, flow and layout 
 
 ## How it is built
 Battle (the new game, built and partly tested):
-- `ReplicatedStorage.BattleData`: the one rule set. MaxEnergy 10, StartEnergy 1, +1 energy per turn each side. Moves: Charge (free, +2 energy), Strike (cost 2, 20 dmg), Block (cost 1, cancels one attack, refunds cost when it blocks), Blast (cost 5, 45 dmg). Test spirits Wood=Nature, Ember=Fire, Pebble=Earth, Breeze=Wind, 100 HP each. Elements: Fire>Nature>Earth>Wind>Fire, Water>Fire; 1.5x strong, 0.5x weak. EventTime table keeps server and client in step. All numbers are placeholders.
-- `ServerScriptService.BattleServer`: spawns wild spirits on `Workspace.TestArea` WildSpot parts (Species attribute). Walk within 9 studs: "!" for 0.9s, player frozen, battle starts. Server-authoritative turns, random foe AI, arena built per player far away (4000+, 300, 4000) as a Persistent Model. Remotes in `ReplicatedStorage.BattleRemotes` (Start, Events, End, Move). Win: wild despawns, respawns after 8s. Lose or run: 4s cooldown. Placeholder rules: double knockout is a player win; losing sends you to spawn with no penalty. Player's spirit is the player attribute BattleSpirit, default Wood. Teleport pads: part with a ProximityPrompt and a Dest attribute.
-- `StarterPlayerScripts.BattleClient`: plain placeholder battle UI (foe panel, your panel with energy, message bars, FIGHT / BAG(soon) / TEAM(soon) / RUN, move page with costs), fade, scripted camera, simple effects, hides other HUDs during battle, uses RequestStreamAsync. Does NOT use BattleFXPack yet.
+- `ReplicatedStorage.BattleData`: the one rule set. MaxEnergy 10, StartEnergy 1, +1 energy per turn each side. Moves: Charge (free, +2 energy), Strike (cost 2, 20 dmg), Block (cost 1, cancels one attack, refunds cost when it blocks), Blast (cost 5, 45 dmg). Tame (placeholders): works at or below 30% wild health; chance 25% at 30% health rising linearly to 90% near 0; `D.tameChance(hp, max)`; owned list cap 60. Test spirits Wood=Nature, Ember=Fire, Pebble=Earth, Breeze=Wind, 100 HP each. Elements: Fire>Nature>Earth>Wind>Fire, Water>Fire; 1.5x strong, 0.5x weak. EventTime table keeps server and client in step. All numbers are placeholders.
+- `ServerScriptService.BattleServer`: spawns wild spirits on `Workspace.TestArea` WildSpot parts (Species attribute). Walk within 9 studs: "!" for 0.9s, player frozen, battle starts. Server-authoritative turns, random foe AI, arena built per player far away (4000+, 300, 4000) as a Persistent Model. Remotes in `ReplicatedStorage.BattleRemotes` (Start, Events, End, Move). Win: wild despawns, respawns after 8s. Lose or run: 4s cooldown. Placeholder rules: double knockout is a player win; losing sends you to spawn with no penalty. Player's spirit is the player attribute BattleSpirit, default Wood. TAME (move id "Tame"): server rejects it above the threshold; a failed try uses your turn and the wild spirit still acts; a success ends the battle ("You tamed X!"), removes the wild spirit like a win and appends its name to the player attribute OwnedSpirits. Studio-only test hooks (Workspace attributes, ignored outside Studio): TestFoeHpFrac (0 to 1, wild starting health) and TestTameForce ("success" or "fail"). Teleport pads: part with a ProximityPrompt and a Dest attribute.
+- `StarterPlayerScripts.BattleClient`: plain placeholder battle UI (foe panel, your panel with energy, message bars, FIGHT / BAG(soon) / TEAM(soon) / RUN, move page with costs, TAME button under the menu showing the live chance or "needs 30% HP or less"), fade, scripted camera, simple effects, hides other HUDs during battle, uses RequestStreamAsync. Does NOT use BattleFXPack yet.
 - `ReplicatedStorage.BattleFXPack` (folder, v0.2, 2026-10-22, from the look-and-feel pass): asset-free battle presentation built from Parts in code. Modules: FX (effects), Moves (ability library), BattleCamera (shots), BattleDialog (typewriter dialog, toasts, energy pops, team XP, level-up), BattleMenu, BattlePlay, Sequencer (Entry, SendOut, Turn, Faint, Catch, Swap, Exit), README, Demo. Everything runs on the client. Not wired into BattleClient.
 - `StarterPlayerScripts.Demo`: an enabled, identical copy of BattleFXPack.Demo. It builds its own far-away arena and runs a bot battle on Play. It runs at the same time as the real BattleClient.
 
 Base and spirits (keepers):
-- `ServerScriptService.BaseServer`: 6 plots in `Workspace.GreyBox` (Plot1..6), 6 base slots per player (up to 9 with the Slots upgrade), spirits on slots earn cash per second, sell prompt on each spirit (60x per-second). Saves cash, slots, upgrades, coils, shields to DataStore `StormSpiritsV1`; unpublished Studio uses an in-memory fake store. `ServerStorage.TestRejoin` BindableFunction tests save and load. Receives deliveries through `ServerStorage.TryDeliver`.
+- `ServerScriptService.BaseServer`: 6 plots in `Workspace.GreyBox` (Plot1..6), 6 base slots per player (up to 9 with the Slots upgrade), spirits on slots earn cash per second, sell prompt on each spirit (60x per-second). Saves cash, slots, upgrades, coils, shields and owned spirits (`owned`, ";"-separated names from OwnedSpirits) to DataStore `StormSpiritsV1`; unpublished Studio uses an in-memory fake store. `ServerStorage.TestRejoin` BindableFunction tests save and load. Receives deliveries through `ServerStorage.TryDeliver`.
 - `ReplicatedStorage.SpiritData`: rarities Common to Secret, cash per second 1, 3, 10, 30, 100, 300, 1000, mutations Big x3 and Shiny x2, placeholder roster (Wood, Breeze, Ember, Pebble, Nature, Light, Gale, Blaze, Boulder, Pumpkin, Mother Earth, Inferno, Tempest, Mountain, Void, Eclipse, Harvest Moon), zone weights from the storm era.
 - `ReplicatedStorage.SpiritModels`: chunky multi-part models built in code, front faces -Z. Only Wood and Breeze have real models; others use BuildOrb recolored by element.
 - `ReplicatedStorage.SpiritRig`: code-only animation for those models (walk, hover, idle).
 - `ReplicatedStorage.UpgradeData` + `ServerScriptService.UpgradeServer` + `StarterPlayerScripts.ShopClient`: plain shop near `Workspace.GreyBox.CenterShop` (within 40 studs). Tracks Health, Bag, Slots, Income, coils, Shield item. All prices 0. Health, bag and shield may need rethinking under the pivot.
+- `StarterPlayerScripts.OwnedSpiritsClient`: TEMPORARY plain "My spirits (N)" list on the left edge, from OwnedSpirits. Hidden during battles.
 - `ReplicatedStorage.UiArt`: empty placeholders for UI images.
 
 Storm era (still in the place, expected to go under the pivot):
@@ -53,12 +54,14 @@ Place contents (Studio, 2026-10-23): Workspace has Baseplate, SpawnLocation at (
 
 ## Tested and untested
 - Tested and working: battle entry, menu, turns, energy, rejection when energy is too low, element math (Wood Strike did 10 to Ember, Ember Strike did 30 to Wood), lose flow back to spawn. Save and load through TestRejoin.
-- Not tested: win ending, RUN, whether effects are visible on screen, the BattleFXPack sequences inside a real battle. Camera framing is rough (your spirit blocks part of the view).
+- Taming tested 2026-10-23 in Play with the test hooks (Pebble at 20% health, 47% chance shown): a forced fail used the turn and Pebble acted; energy went up by 1 at turn end; a forced success ended the battle with "You tamed Pebble!" and the list showed Pebble; after TestRejoin the list still showed Pebble. The random roll itself (no hook) was not exercised.
+- Not tested: win ending, RUN, whether effects are visible on screen, the BattleFXPack sequences inside a real battle, the TAME reject message above 30%.
+- Found 2026-10-23: the enabled FX Demo (StarterPlayerScripts.Demo) runs on every Play and its own arena and camera show on screen during the real battle (its "A wild Ember has appeared!" box stays up). The "camera framing is rough" note was most likely this. The real battle's view has not been seen without it.
 
 ## Open tasks (priority order)
-1. Decide what to do with the enabled FX Demo in StarterPlayerScripts (it runs on every Play) and the EV_ parts in Workspace. Ask Don.
+1. The enabled FX Demo hijacks the camera during real battles. Ask Don whether to disable it (and what to do with the EV_ parts). Then re-check the real battle view.
 2. Wire BattleFXPack into BattleClient (or replace BattleClient's placeholder effects with the pack) and test win, RUN and visible effects.
-3. Taming: catch a wild spirit at low health, add it to the player's team. Needs design first: taming chance, does the wild fight back, team size.
+3. Pick which owned spirit fights (BattleSpirit is still always Wood) and a real team/inventory UI.
 4. Place tamed spirits on the home base (replace the storm-era delivery path).
 5. Home base as a real map (now grey cubes). Plan the look and what "home customizing" means.
 6. Remove or retire the storm-era scripts and the old HUD once nothing depends on them. Do not delete without Don's OK.

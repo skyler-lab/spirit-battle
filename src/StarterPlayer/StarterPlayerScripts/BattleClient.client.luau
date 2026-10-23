@@ -84,6 +84,14 @@ local team = button("main", "TEAM", cell(0, 1), UDim2.fromOffset(W, H), Color3.f
 button("main", "RUN", cell(1, 1), UDim2.fromOffset(W, H), Color3.fromRGB(50, 110, 210), function()
 	if canAct then canAct = false; showPage("main"); EvMove:FireServer("Run") end
 end)
+-- TAME: only lights up when the wild spirit is at or below the tame threshold (BattleData.Tame)
+local tameBtn = button("main", "TAME", cell(0, 2), UDim2.fromOffset(W * 2 + G, H), Color3.fromRGB(60, 160, 90), function()
+	if canAct and state and Data.tameChance(state.foeHp, state.foeMax) > 0 then
+		canAct = false; showPage("main"); EvMove:FireServer("Tame")
+	elseif canAct then
+		addMsg("Too strong to tame! Get its health to " .. math.floor(Data.Tame.Threshold * 100) .. "% or less.")
+	end
+end)
 local mi = 0
 for _, id in ipairs(Data.MoveOrder) do
 	local mv = Data.Moves[id]
@@ -100,6 +108,9 @@ local function refreshMoves()
 		local ok = state and state.myEn >= Data.Moves[id].cost
 		b.TextTransparency = ok and 0 or 0.6; b.BackgroundTransparency = ok and 0 or 0.5
 	end
+	local ch = state and Data.tameChance(state.foeHp, state.foeMax) or 0
+	tameBtn.Text = (ch > 0) and ("TAME  (" .. math.floor(ch * 100 + 0.5) .. "% chance)") or ("TAME  (needs " .. math.floor(Data.Tame.Threshold * 100) .. "% HP or less)")
+	tameBtn.TextTransparency = (ch > 0) and 0 or 0.5; tameBtn.BackgroundTransparency = (ch > 0) and 0 or 0.5
 end
 
 -- bars
@@ -189,7 +200,15 @@ local function playEvents(evs)
 	for _, e in ipairs(evs) do
 		applySnap(e.s)
 		if e.k == "say" then addMsg(e.text, e.who)
-		elseif e.k == "reject" then addMsg("Not enough energy!")
+		elseif e.k == "reject" then
+			if e.why == "tame" then addMsg("Too strong to tame!") else addMsg("Not enough energy!") end
+		elseif e.k == "tame" then
+			local m = stageModel("foe")
+			if m then
+				local ring = tmp(Vector3.new(7, 7, 7), Color3.fromRGB(80, 220, 120), m:GetPivot(), Enum.PartType.Ball, 0.4)
+				TS:Create(ring, TweenInfo.new(1.1), { Size = Vector3.new(1, 1, 1), Transparency = 1 }):Play()
+			end
+			addMsg(e.ok and "Success!" or ("Failed... (" .. math.floor((e.chance or 0) * 100 + 0.5) .. "% chance)"))
 		elseif e.k == "fx" then
 			local m = stageModel(e.who)
 			if m then if e.type == "charge" then fxCharge(m) else fxBlock(m) end end

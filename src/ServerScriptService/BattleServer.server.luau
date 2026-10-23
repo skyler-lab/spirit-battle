@@ -3,6 +3,7 @@ local RS = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local Data = require(RS:WaitForChild("BattleData"))
 local Models = require(RS:WaitForChild("SpiritModels"))
+local RunService = game:GetService("RunService")
 
 local remotes = RS:FindFirstChild("BattleRemotes")
 if not remotes then remotes = Instance.new("Folder"); remotes.Name = "BattleRemotes"; remotes.Parent = RS end
@@ -118,7 +119,7 @@ local function finish(player, b, result)
 	local hrp = char and char:FindFirstChild("HumanoidRootPart")
 	if hrp then hrp.Anchored = false end
 	local w = b.wild
-	if result == "win" then
+	if result == "win" or result == "tame" then
 		if w.model then w.model:Destroy(); w.model = nil end
 		task.delay(8, function() spawnWild(w) end)
 	else
@@ -185,6 +186,9 @@ local function startBattle(player, w)
 	b.myEl, b.foeEl = Data.Spirits[myName].element, Data.Spirits[foeName].element
 	b.myHp, b.myMax = Data.Spirits[myName].hp, Data.Spirits[myName].hp
 	b.foeHp, b.foeMax = Data.Spirits[foeName].hp, Data.Spirits[foeName].hp
+	-- TEST HOOK (Studio only): Workspace attribute TestFoeHpFrac (0 to 1) sets the wild spirit's starting health
+	local frac = RunService:IsStudio() and workspace:GetAttribute("TestFoeHpFrac")
+	if type(frac) == "number" and frac > 0 and frac <= 1 then b.foeHp = math.max(1, math.floor(b.foeMax * frac)) end
 	b.myEn, b.foeEn = Data.StartEnergy, Data.StartEnergy
 	b.stage = buildStage(player, myName, foeName)
 	b.starting = false
@@ -201,6 +205,56 @@ local function totalTime(evs)
 	return t
 end
 
+-- ===== taming =====
+local function addOwned(player, name)
+	local cur = player:GetAttribute("OwnedSpirits") or ""
+	local list = (cur == "") and {} or string.split(cur, ";")
+	if #list >= Data.Tame.MaxOwned then return false end
+	table.insert(list, name)
+	player:SetAttribute("OwnedSpirits", table.concat(list, ";"))
+	return true
+end
+
+local function rollTame(chance)
+	-- TEST HOOK (Studio only): Workspace attribute TestTameForce = "success" or "fail" forces the roll
+	local force = RunService:IsStudio() and workspace:GetAttribute("TestTameForce")
+	if force == "success" then return true elseif force == "fail" then return false end
+	return math.random() < chance
+end
+
+-- a TAME try uses the player's turn; on a fail the wild spirit still acts
+local function tameTurn(player, b)
+	local evs = {}
+	local function push(e) e.s = snap(b); table.insert(evs, e) end
+	local chance = Data.tameChance(b.foeHp, b.foeMax)
+	push({ k = "say", who = "me", text = "You tried to tame " .. b.foeName .. "!" })
+	local ok = rollTame(chance)
+	push({ k = "tame", ok = ok, chance = chance })
+	if ok then
+		local saved = addOwned(player, b.foeName)
+		push({ k = "end", result = "tame", text = saved and ("You tamed " .. b.foeName .. "!") or "Your spirit list is full!" })
+		return evs, "tame"
+	end
+	push({ k = "say", who = "foe", text = b.foeName .. " broke free!" })
+	-- the wild spirit's move (the player made no move, so nothing of theirs blocks)
+	local fm = Data.Moves[chooseFoe(b)]
+	b.foeEn -= fm.cost
+	push({ k = "say", who = "foe", text = b.foeName .. " used " .. fm.name .. "!" })
+	if fm.kind == "charge" then b.foeEn = math.min(Data.MaxEnergy, b.foeEn + fm.gain); push({ k = "fx", type = "charge", who = "foe" })
+	elseif fm.kind == "block" then push({ k = "fx", type = "block", who = "foe" })
+	elseif fm.kind == "attack" then
+		local mult = Data.multiplier(b.foeEl, b.myEl)
+		local dmg = math.floor(fm.power * mult)
+		b.myHp = math.max(0, b.myHp - dmg)
+		push({ k = "hit", who = "foe", dmg = dmg, mult = mult })
+	end
+	if b.myHp <= 0 then push({ k = "end", result = "lose", text = b.myName .. " fainted!" }); return evs, "lose" end
+	b.myEn = math.min(Data.MaxEnergy, b.myEn + Data.TurnEnergy)
+	b.foeEn = math.min(Data.MaxEnergy, b.foeEn + Data.TurnEnergy)
+	push({ k = "en" })
+	return evs, nil
+end
+
 EvMove.OnServerEvent:Connect(function(player, id)
 	local b = battles[player]
 	if not b or not b.ready or b.busy or b.over or typeof(id) ~= "string" then return end
@@ -209,6 +263,16 @@ EvMove.OnServerEvent:Connect(function(player, id)
 		local evs = { { k = "say", who = "me", text = "Got away safely!", s = snap(b) }, { k = "end", result = "run", s = snap(b) } }
 		EvEvents:FireClient(player, evs)
 		task.delay(totalTime(evs) + 0.2, function() finish(player, b, "run") end)
+		return
+	end
+	if id == "Tame" then
+		if Data.tameChance(b.foeHp, b.foeMax) <= 0 then EvEvents:FireClient(player, { { k = "reject", why = "tame", s = snap(b) } }); return end
+		b.busy = true
+		local evs, result = tameTurn(player, b)
+		EvEvents:FireClient(player, evs)
+		task.delay(totalTime(evs) + 0.3, function()
+			if result then finish(player, b, result) elseif battles[player] == b then b.busy = false end
+		end)
 		return
 	end
 	local mv = Data.Moves[id]
