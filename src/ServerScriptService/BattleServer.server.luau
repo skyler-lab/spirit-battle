@@ -114,6 +114,7 @@ end
 local function finish(player, b, result)
 	if battles[player] ~= b then return end
 	b.over = true
+	player:SetAttribute("InBattle", false)
 	if b.stage then b.stage:Destroy() end
 	local char = player.Character
 	local hrp = char and char:FindFirstChild("HumanoidRootPart")
@@ -172,10 +173,11 @@ local function startBattle(player, w)
 	battles[player] = b
 	w.busy = true
 	w.alert.Enabled = true
+	player:SetAttribute("InBattle", true) -- HealthServer skips storm damage while this is set
 	hrp.Anchored = true
 	task.wait(0.9)
 	if not player.Parent or not hrp.Parent or not w.model then
-		w.busy = false; w.alert.Enabled = false; battles[player] = nil
+		w.busy = false; w.alert.Enabled = false; battles[player] = nil; player:SetAttribute("InBattle", false)
 		if hrp.Parent then hrp.Anchored = false end
 		return
 	end

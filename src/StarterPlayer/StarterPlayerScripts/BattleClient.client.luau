@@ -168,7 +168,7 @@ local function fxHit(from, to, color)
 end
 
 -- camera: behind and to the side of your spirit so both spirits are in view. Distances scale with the gap between them.
-local BATTLE_FOV = 52
+local BATTLE_FOV = 40
 local normalFov = cam.FieldOfView
 local function setCamera()
 	local my = state.stage:WaitForChild("MyModel"):GetPivot().Position
@@ -177,11 +177,11 @@ local function setCamera()
 	local d = flat.Magnitude
 	local dir = flat.Unit
 	local right = dir:Cross(Vector3.new(0, 1, 0))
-	local pos = my - dir * (d * 0.55) + right * (d * 0.45) + Vector3.new(0, d * 0.3, 0)
+	local pos = my - dir * (d * 1.05) + right * (d * 0.6) + Vector3.new(0, d * 0.4, 0)
 	normalFov = cam.FieldOfView
 	cam.CameraType = Enum.CameraType.Scriptable
 	cam.FieldOfView = BATTLE_FOV
-	cam.CFrame = CFrame.lookAt(pos, my + (foe - my) * 0.6 + Vector3.new(0, 1, 0))
+	cam.CFrame = CFrame.lookAt(pos, my + (foe - my) * 0.5 + Vector3.new(0, 1.5, 0))
 end
 
 local function tweenFade(to, t) local tw = TS:Create(fade, TweenInfo.new(t), { BackgroundTransparency = to }); tw:Play(); tw.Completed:Wait() end

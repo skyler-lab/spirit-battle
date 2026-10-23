@@ -1,5 +1,13 @@
 # Log
 
+## 2026-10-23: Camera back, real win and real tame
+Request: move the battle camera back, win a real battle showing effects, tame with the normal roll, screenshots of each.
+- Camera now further back, FOV 40; both spirits fully in view and closer in size.
+- Real win vs Pebble: effects visible (small green shot), "Pebble was defeated!". Real tame: 68% roll succeeded, list showed Pebble.
+- Found storm knocking the player out in the test area. Paused storm damage during battles (InBattle attribute); still knocked out after a battle ends. tameChance now 0 at 0 HP.
+- Files: BattleClient, BattleServer, HealthServer, BattleData, docs.
+- Open: storm vs test area needs Don's call. No faint effect on win. Don to press Ctrl+S.
+
 ## 2026-10-23: Battle camera framing
 Request: fix the battle camera so both spirits are clearly visible, show a screenshot.
 - Tuned live in a Wood vs Breeze battle, then wrote it into BattleClient.setCamera: behind and to the side of your spirit, scaled to the gap, FOV 52.

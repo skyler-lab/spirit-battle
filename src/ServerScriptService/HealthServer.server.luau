@@ -94,6 +94,7 @@ while true do
 				local seen = Storm.LevelFor(Config.ZoneAt(root.Position), t)
 				local dmg = dpsAtLevel(seen) * TICK
 				if (plr:GetAttribute("ShieldUntil") or 0) > Workspace:GetServerTimeNow() then dmg = 0 end  -- storm shield item
+				if plr:GetAttribute("InBattle") then dmg = 0 end  -- no storm damage during a battle
 				plr:SetAttribute("StormSeen", seen)
 				local hp = (plr:GetAttribute("Health") or max) - dmg
 				if hp <= 0 then

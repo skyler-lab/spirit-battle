@@ -55,7 +55,7 @@ D.Tame = {
 
 -- 0 when the wild spirit is too healthy to tame, otherwise the success chance (0 to 1)
 function D.tameChance(hp, maxHp)
-	if not hp or not maxHp or maxHp <= 0 then return 0 end
+	if not hp or not maxHp or maxHp <= 0 or hp <= 0 then return 0 end
 	local frac = hp / maxHp
 	if frac > D.Tame.Threshold then return 0 end
 	local t = math.clamp(frac / D.Tame.Threshold, 0, 1)
