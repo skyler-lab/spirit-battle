@@ -1,5 +1,12 @@
 # Log
 
+## 2026-10-23: Battle camera framing
+Request: fix the battle camera so both spirits are clearly visible, show a screenshot.
+- Tuned live in a Wood vs Breeze battle, then wrote it into BattleClient.setCamera: behind and to the side of your spirit, scaled to the gap, FOV 52.
+- Battle end restores the normal FOV. Fresh Play test matched the tuned shot. RUN tested for the first time: works.
+- Files: BattleClient, docs.
+- Open: win ending and visible effects still untested. Don to press Ctrl+S.
+
 ## 2026-10-23: Disable the FX Demo, re-check battle view
 Request: disable the FX Demo LocalScript (don't delete it) and screenshot the real battle view.
 - Set StarterPlayerScripts.Demo Enabled = false. The script is still there.
