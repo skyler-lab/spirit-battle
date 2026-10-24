@@ -84,11 +84,10 @@ Place contents (Studio, 2026-10-23): Workspace has Baseplate, SpawnLocation at (
 2. Wire BattleFXPack into BattleClient (or replace BattleClient's placeholder effects with the pack) and test win, RUN and visible effects.
 3. Decide whether placed spirits keep the old Sell prompt.
 4. Pick which owned spirit fights (BattleSpirit is still always Wood) and a real team/inventory UI.
-5. Place tamed spirits on the home base (replace the storm-era delivery path).
-6. Home base as a real map (now grey cubes). Plan the look and what "home customizing" means.
-7. Remove or retire the storm-era scripts and the old HUD once nothing depends on them. Do not delete without Don's OK.
-8. Fire island, then more islands and the world map.
-9. Later: shops and items (economy first, then prices), evolution, friendly battles, customizing, rebirth, tutorial, real UI and art, publish and real DataStore test.
+5. Home base as a real map (now grey cubes). Plan the look and what "home customizing" means.
+6. Remove or retire the storm-era scripts and the old HUD once nothing depends on them. Do not delete without Don's OK.
+7. Fire island, then more islands and the world map.
+8. Later: shops and items (economy first, then prices), evolution, friendly battles, customizing, rebirth, tutorial, real UI and art, publish and real DataStore test.
 
 ## Open questions (unanswered)
 Final name; teleport vs guided travel on the world map; what "home customizing" means; how finished the home base must be before battles; how many spirits per battle; does a wild spirit fight back and what is the taming chance; remove the storm for good (it is off for now); how many elements.
