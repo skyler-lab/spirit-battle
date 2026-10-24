@@ -78,7 +78,7 @@ Place contents (Studio, 2026-10-23, after the home island): Workspace has Basepl
   - The SpiritDelivered fly-in animation is only for delivery; placed spirits just appear.
 - Home island checked in Play 2026-10-23: spawn works; walked to the shop with pathfinding and bought an upgrade inside the 40-stud range; walked to the portal and held E to reach the test area; tamed Breeze (test switches); held E on the return pad and landed at the island's portal end; placed Breeze on Plot 1 slot 1, 1 cash per second (cash ticks once a second, so a 10s window read 9 to 10); TestRejoin kept cash, the placed spirit and the upgrade; walking and jumping at the edge stops at the invisible wall (radius about 232.5).
 - Island fixes checked in Play 2026-10-23: spawn sits on the path and the player spawns facing the shop; portal triggered from 8.9 studs, return pad from 9.2 studs; walking and jumping toward the test-area edge stops at x 679.5 and z 79.5 (ground edge 680 and 80); the DevShowcase Wood and Breeze no longer appear.
-- Still looks off (left alone on purpose): blank sign boards, the island edge looks faceted from high up, plot borders block walking except through the front gap. A Wood follower still trails the player: FollowClient draws it while Workspace attribute DevShowcase is true (not the DevShowcase script).
+- Still looks off (left alone on purpose): blank sign boards, the island edge looks faceted from high up, plot borders block walking except through the front gap. The Wood follower is off: Workspace attribute DevShowcase set to false 2026-10-23 (FollowClient only draws it while true; set it back to true to bring it back). Checked in Play: no spirit models near the player at spawn.
 - Storm off, checked in Play 2026-10-23: home base loads (plot, save data, cash HUD, spirits list), no siren or health bar; test area has clear sky and no damage (6s, no knockout); battle works (low-energy reject, Charge, Strike, RUN); 8s after the battle the player is still in the test area, no knockout. No errors from game scripts.
 - Placeholder orbs (Pebble, Ember) are neon, so Pebble's brown reads bright yellow, and the orb floats beside its platform.
 
@@ -86,7 +86,7 @@ Place contents (Studio, 2026-10-23, after the home island): Workspace has Basepl
 1. Ask Don what to do with the EV_ parts in Workspace. Placeholder orbs look odd (neon, floating); fine until real models exist.
 2. Wire BattleFXPack into BattleClient (or replace BattleClient's placeholder effects with the pack) and test win, RUN and visible effects.
 3. Pick which owned spirit fights (BattleSpirit is still always Wood) and a real team/inventory UI.
-4. Home island: decide on the blank sign boards and the Wood follower (Workspace attribute DevShowcase). Then plan what "home customizing" means and the art list in docs/HOME-BASE-PLAN.md.
+4. Home island: decide on the blank sign boards. Then plan what "home customizing" means and the art list in docs/HOME-BASE-PLAN.md.
 5. Remove or retire the storm-era scripts and the old HUD once nothing depends on them. Do not delete without Don's OK.
 6. Fire island, then more islands and the world map.
 7. Later: shops and items (economy first, then prices), evolution, friendly battles, customizing, rebirth, tutorial, real UI and art, publish and real DataStore test.

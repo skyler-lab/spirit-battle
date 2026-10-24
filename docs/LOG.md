@@ -1,5 +1,10 @@
 # Log
 
+## 2026-10-23: Wood follower off
+Request: turn off the Wood follower by setting the DevShowcase workspace setting off, delete nothing.
+- Set Workspace attribute DevShowcase = false. Play check: no follower or showcase spirits near the player.
+- Files: docs. Game object changed: Workspace attribute DevShowcase. Don to press Ctrl+S.
+
 ## 2026-10-23: Island fixes
 Request: spawn on the ground facing the shop, invisible walls round the test area, teleport pads at about 8 studs, disable the showcase Wood and Breeze. Leave signs, island edge and borders.
 - Spawn moved down onto the path (0, 2.19, -70) facing the shop. TestArea.EdgeWalls added. Both teleport prompts: range 12, line of sight off. DevShowcase script disabled.
