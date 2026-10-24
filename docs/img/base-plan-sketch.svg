@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="710" viewBox="0 0 640 710" font-family="Arial, sans-serif">
+<rect width="640" height="710" fill="#ffffff"/>
+<rect width="640" height="640" fill="#7fb6e0"/>
+<circle cx="320" cy="320" r="232" fill="#d9c79a"/>
+<circle cx="320" cy="320" r="222" fill="#79c26a"/>
+<line x1="320" y1="320" x2="320.0" y2="420.8" stroke="#e8d9a8" stroke-width="16" stroke-linecap="round"/>
+<line x1="320" y1="320" x2="407.12" y2="370.4" stroke="#e8d9a8" stroke-width="16" stroke-linecap="round"/>
+<line x1="320" y1="320" x2="407.12" y2="269.6" stroke="#e8d9a8" stroke-width="16" stroke-linecap="round"/>
+<line x1="320" y1="320" x2="320.0" y2="219.2" stroke="#e8d9a8" stroke-width="16" stroke-linecap="round"/>
+<line x1="320" y1="320" x2="232.88" y2="269.6" stroke="#e8d9a8" stroke-width="16" stroke-linecap="round"/>
+<line x1="320" y1="320" x2="232.88" y2="370.4" stroke="#e8d9a8" stroke-width="16" stroke-linecap="round"/>
+<line x1="320" y1="320" x2="525" y2="320" stroke="#e8d9a8" stroke-width="16" stroke-linecap="round"/>
+<circle cx="320" cy="320" r="58" fill="#e8d9a8"/>
+<g transform="translate(320,460) rotate(0.0)">
+<rect x="-42" y="-47" width="84" height="94" rx="4" fill="#8a6b45"/>
+<rect x="-40" y="-45" width="80" height="90" rx="3" fill="#d6d9de"/>
+<circle cx="-18" cy="-30" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="-30" r="8" fill="#5a6a86"/>
+<circle cx="-18" cy="0" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="0" r="8" fill="#5a6a86"/>
+<circle cx="-18" cy="30" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="30" r="8" fill="#5a6a86"/>
+<rect x="-12" y="-58" width="24" height="9" fill="#ffffff" stroke="#333" stroke-width="1"/>
+</g>
+<text x="320.0" y="464.0" font-size="13" font-weight="bold" text-anchor="middle" fill="#222" stroke="#ffffff" stroke-width="3" paint-order="stroke">Plot 1</text>
+<g transform="translate(441,390) rotate(-60.0)">
+<rect x="-42" y="-47" width="84" height="94" rx="4" fill="#8a6b45"/>
+<rect x="-40" y="-45" width="80" height="90" rx="3" fill="#d6d9de"/>
+<circle cx="-18" cy="-30" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="-30" r="8" fill="#5a6a86"/>
+<circle cx="-18" cy="0" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="0" r="8" fill="#5a6a86"/>
+<circle cx="-18" cy="30" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="30" r="8" fill="#5a6a86"/>
+<rect x="-12" y="-58" width="24" height="9" fill="#ffffff" stroke="#333" stroke-width="1"/>
+</g>
+<text x="441.0" y="394.0" font-size="13" font-weight="bold" text-anchor="middle" fill="#222" stroke="#ffffff" stroke-width="3" paint-order="stroke">Plot 2</text>
+<g transform="translate(441,250) rotate(-120.0)">
+<rect x="-42" y="-47" width="84" height="94" rx="4" fill="#8a6b45"/>
+<rect x="-40" y="-45" width="80" height="90" rx="3" fill="#d6d9de"/>
+<circle cx="-18" cy="-30" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="-30" r="8" fill="#5a6a86"/>
+<circle cx="-18" cy="0" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="0" r="8" fill="#5a6a86"/>
+<circle cx="-18" cy="30" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="30" r="8" fill="#5a6a86"/>
+<rect x="-12" y="-58" width="24" height="9" fill="#ffffff" stroke="#333" stroke-width="1"/>
+</g>
+<text x="441.0" y="254.0" font-size="13" font-weight="bold" text-anchor="middle" fill="#222" stroke="#ffffff" stroke-width="3" paint-order="stroke">Plot 3</text>
+<g transform="translate(320,180) rotate(-180.0)">
+<rect x="-42" y="-47" width="84" height="94" rx="4" fill="#8a6b45"/>
+<rect x="-40" y="-45" width="80" height="90" rx="3" fill="#d6d9de"/>
+<circle cx="-18" cy="-30" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="-30" r="8" fill="#5a6a86"/>
+<circle cx="-18" cy="0" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="0" r="8" fill="#5a6a86"/>
+<circle cx="-18" cy="30" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="30" r="8" fill="#5a6a86"/>
+<rect x="-12" y="-58" width="24" height="9" fill="#ffffff" stroke="#333" stroke-width="1"/>
+</g>
+<text x="320.0" y="184.0" font-size="13" font-weight="bold" text-anchor="middle" fill="#222" stroke="#ffffff" stroke-width="3" paint-order="stroke">Plot 4</text>
+<g transform="translate(199,250) rotate(-240.0)">
+<rect x="-42" y="-47" width="84" height="94" rx="4" fill="#8a6b45"/>
+<rect x="-40" y="-45" width="80" height="90" rx="3" fill="#d6d9de"/>
+<circle cx="-18" cy="-30" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="-30" r="8" fill="#5a6a86"/>
+<circle cx="-18" cy="0" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="0" r="8" fill="#5a6a86"/>
+<circle cx="-18" cy="30" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="30" r="8" fill="#5a6a86"/>
+<rect x="-12" y="-58" width="24" height="9" fill="#ffffff" stroke="#333" stroke-width="1"/>
+</g>
+<text x="199.0" y="254.0" font-size="13" font-weight="bold" text-anchor="middle" fill="#222" stroke="#ffffff" stroke-width="3" paint-order="stroke">Plot 5</text>
+<g transform="translate(199,390) rotate(60.0)">
+<rect x="-42" y="-47" width="84" height="94" rx="4" fill="#8a6b45"/>
+<rect x="-40" y="-45" width="80" height="90" rx="3" fill="#d6d9de"/>
+<circle cx="-18" cy="-30" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="-30" r="8" fill="#5a6a86"/>
+<circle cx="-18" cy="0" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="0" r="8" fill="#5a6a86"/>
+<circle cx="-18" cy="30" r="8" fill="#5a6a86"/>
+<circle cx="18" cy="30" r="8" fill="#5a6a86"/>
+<rect x="-12" y="-58" width="24" height="9" fill="#ffffff" stroke="#333" stroke-width="1"/>
+</g>
+<text x="199.0" y="394.0" font-size="13" font-weight="bold" text-anchor="middle" fill="#222" stroke="#ffffff" stroke-width="3" paint-order="stroke">Plot 6</text>
+<rect x="295" y="295" width="50" height="50" fill="#e0a43a" stroke="#7a5310" stroke-width="2"/>
+<text x="320" y="325" font-size="13" font-weight="bold" text-anchor="middle">SHOP</text>
+<rect x="312" y="272" width="16" height="12" fill="#3a7bd5"/>
+<text x="320" y="268" font-size="11" font-weight="bold" text-anchor="middle">SPAWN</text>
+<rect x="520" y="304" width="14" height="32" rx="3" fill="#9b59d0" stroke="#4b1f73" stroke-width="2"/>
+<text x="516" y="296" font-size="11" font-weight="bold" text-anchor="end">PORTAL</text>
+<line x1="546" y1="320" x2="628" y2="320" stroke="#4b1f73" stroke-width="2" stroke-dasharray="6,4"/>
+<text x="628" y="338" font-size="11" text-anchor="end" fill="#222">to test area</text>
+<text x="628" y="351" font-size="11" text-anchor="end" fill="#222">(600, 0, 0)</text>
+<text x="12" y="22" font-size="12" fill="#123">Top-down, same view as the Studio screenshot</text>
+<line x1="12" y1="40" x2="112" y2="40" stroke="#123" stroke-width="3"/><text x="118" y="44" font-size="11" fill="#123">100 studs</text>
+<rect x="12" y="648" width="12" height="12" fill="#79c26a"/><text x="28" y="658" font-size="11">grass island</text>
+<rect x="114" y="648" width="12" height="12" fill="#e8d9a8"/><text x="130" y="658" font-size="11">plaza and paths</text>
+<rect x="234" y="648" width="12" height="12" fill="#d6d9de"/><text x="250" y="658" font-size="11">plot (6 slots)</text>
+<rect x="348" y="648" width="12" height="12" fill="#8a6b45"/><text x="364" y="658" font-size="11">plot border</text>
+<rect x="444" y="648" width="12" height="12" fill="#e0a43a"/><text x="460" y="658" font-size="11">shop</text>
+<rect x="498" y="648" width="12" height="12" fill="#3a7bd5"/><text x="514" y="658" font-size="11">spawn</text>
+<rect x="558" y="648" width="12" height="12" fill="#9b59d0"/><text x="574" y="658" font-size="11">portal</text>
+<text x="12" y="684" font-size="11" fill="#444">Plots, shop and spawn stay where they are now. Storm rings and pillars hidden. Portal moves to the east edge.</text>
+</svg>

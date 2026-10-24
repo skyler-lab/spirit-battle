@@ -1,5 +1,12 @@
 # Log
 
+## 2026-10-23: Home base island built
+Request: build the island from docs/HOME-BASE-PLAN.md with plain parts, keep plot/shop/spawn names and positions, stop players walking off, test the full route.
+- Backed up to ServerStorage.BeforeHomeIslandR1; storm rings, hub and pillars moved to ServerStorage.StormMapHidden. Built Workspace.HomeIsland (island, sand edge, plaza, paths, plot borders, signs, 72 invisible walls); baseplate recoloured as water; portal moved to the east edge with a frame.
+- Play test: spawn, shop, portal both ways, tame, place, cash, rejoin and edge walls all worked.
+- Files: docs and images (the plan file was restored from history). Game objects as above; no scripts changed.
+- Open: floating spawn pad, blank signs, no walls in the test area. Don to press Ctrl+S.
+
 ## 2026-10-23: Keep the Sell prompt
 Request: keep the Sell prompt on placed spirits.
 - Decision recorded in STATE.md; open task removed. No code or game objects changed.

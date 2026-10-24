@@ -1,6 +1,6 @@
 # Spirit Battle: current state
 
-Last updated: 2026-10-23 (placing tamed spirits added)
+Last updated: 2026-10-23 (home base island built)
 
 ## What it is
 Roblox Prodigy-style spirit battle game. Working name "Spirit Battle", final name TBD. "Storm Spirits" is the old name and the old design (5-minute storm rounds, grab spirits, deliver to base); that design is dropped. Owner: Don (Roblox user SkylerH007). Not published. Halloween 2026 target.
@@ -59,7 +59,7 @@ Storm: TURNED OFF 2026-10-23 at Don's request (disabled, nothing deleted). To tu
 Storm era scripts (in the place, expected to go under the pivot):
 - `RoundServer` (5-minute round clock), `StormController` + `StormClient` (storm visuals and levels), `ZoneConfig` (ring zones and hub), `HealthServer` (storm damage, knockout), `SpiritServer` (spawns spirits by zone, bag pickup, delivery), `FollowClient` (spirits follow you), `SpeedServer` (walk speed and SpeedMult), `CoilServer` + `CoilWear` + `CoilData` + `CoilModels` (speed coils), `ShieldClient` (storm shield button), `HealthHud` (old HUD: siren timer, zone, health bar, bag, cash), `DevShowcase` (temporary showcase spirits at spawn, on while Workspace attribute DevShowcase is true).
 
-Place contents (Studio, 2026-10-23): Workspace has Baseplate, SpawnLocation at (0, 4.65, -70), `GreyBox` (111 parts: the grey-cube home base with 6 plots and CenterShop), `TestArea` (Ground 160x160 at (600,0,0), 4 WildSpot parts, ReturnPad), `TestPortal` (ToTestArea pad near spawn), and `EV_Ground` plus `EV_F1` to `EV_F5` (no script references them; origin unknown, probably left by the FX demo or an evaluation). StreamingEnabled is on. StarterGui is empty (all UI is built by scripts). ServerStorage holds only TryDeliver.
+Place contents (Studio, 2026-10-23, after the home island): Workspace has Baseplate (recoloured as water: SmoothPlastic, blue, its Texture set to Transparency 1), SpawnLocation at (0, 4.65, -70) (unchanged), `GreyBox` (now only Plot1 to Plot6 and CenterShop, same names and positions), `HomeIsland` (SandEdge and Grass discs 464/444 across, Plaza disc 116 across, `Paths` (6 to plots, 1 to the portal), `PlotBorders` (wood rails per plot with an 18-stud gap facing the plaza, plain sign post and blank board), `EdgeWalls` (72 invisible walls, radius 234, 44 high)), `TestArea` (Ground 160x160 at (600,0,0), 4 WildSpot parts, ReturnPad, Dest now (188, 5.65, 0) just inside the island's portal end), `TestPortal` (ToTestArea pad moved to (205, 2.15, 0) on the island's east edge, plus `PortalFrame`: two purple posts and a beam), and `EV_Ground` plus `EV_F1` to `EV_F5` (y=500, no script references them, origin unknown). ServerStorage holds TryDeliver, `BeforeHomeIslandR1` (backup of GreyBox, TestPortal and ReturnPad before the island; original Baseplate colour, material and texture transparency saved as attributes) and `StormMapHidden` (Hub disk, Zone1 to Zone5 rings and 98 Pillars, moved out of GreyBox). StreamingEnabled is on. StarterGui is empty (all UI is built by scripts). Plan and images: docs/HOME-BASE-PLAN.md, docs/img/.
 
 ## Tested and untested
 - Tested and working: battle entry, menu, turns, energy, rejection when energy is too low, element math (Wood Strike did 10 to Ember, Ember Strike did 30 to Wood), lose flow back to spawn. Save and load through TestRejoin.
@@ -76,6 +76,8 @@ Place contents (Studio, 2026-10-23): Workspace has Baseplate, SpawnLocation at (
   - SpiritServer still runs its join setup (BagCount/BagItems) before it stalls. Harmless.
   - FollowClient reads BagItems and, while Workspace attribute DevShowcase is true, shows a Wood follower behind the local player even with an empty bag.
   - The SpiritDelivered fly-in animation is only for delivery; placed spirits just appear.
+- Home island checked in Play 2026-10-23: spawn works; walked to the shop with pathfinding and bought an upgrade inside the 40-stud range; walked to the portal and held E to reach the test area; tamed Breeze (test switches); held E on the return pad and landed at the island's portal end; placed Breeze on Plot 1 slot 1, 1 cash per second (cash ticks once a second, so a 10s window read 9 to 10); TestRejoin kept cash, the placed spirit and the upgrade; walking and jumping at the edge stops at the invisible wall (radius about 232.5).
+- Looks off on the island: the spawn pad floats about 2.5 studs above the ground (kept in place on purpose) and the player spawns facing Plot 4, not the shop; sign boards are blank dark slabs; the island edge looks faceted from high up; the portal and return pad need E held 0.3s and the return pad did not trigger from 8 studs (worked from about 4); plot borders block walking except through the front gap; the test area has no walls, so players can walk off it onto the water-coloured baseplate; the DevShowcase Wood and Breeze still stand near spawn.
 - Storm off, checked in Play 2026-10-23: home base loads (plot, save data, cash HUD, spirits list), no siren or health bar; test area has clear sky and no damage (6s, no knockout); battle works (low-energy reject, Charge, Strike, RUN); 8s after the battle the player is still in the test area, no knockout. No errors from game scripts.
 - Placeholder orbs (Pebble, Ember) are neon, so Pebble's brown reads bright yellow, and the orb floats beside its platform.
 
@@ -83,7 +85,7 @@ Place contents (Studio, 2026-10-23): Workspace has Baseplate, SpawnLocation at (
 1. Ask Don what to do with the EV_ parts in Workspace. Placeholder orbs look odd (neon, floating); fine until real models exist.
 2. Wire BattleFXPack into BattleClient (or replace BattleClient's placeholder effects with the pack) and test win, RUN and visible effects.
 3. Pick which owned spirit fights (BattleSpirit is still always Wood) and a real team/inventory UI.
-4. Home base as a real map (now grey cubes). Plan the look and what "home customizing" means.
+4. Home island polish (see "Home island checked" above): spawn pad floats and faces away from the shop, blank sign boards, test area has no walls. Then plan what "home customizing" means and the art list in docs/HOME-BASE-PLAN.md.
 5. Remove or retire the storm-era scripts and the old HUD once nothing depends on them. Do not delete without Don's OK.
 6. Fire island, then more islands and the world map.
 7. Later: shops and items (economy first, then prices), evolution, friendly battles, customizing, rebirth, tutorial, real UI and art, publish and real DataStore test.
