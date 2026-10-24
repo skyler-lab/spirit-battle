@@ -69,3 +69,6 @@ Another chat may already have done a battle look-and-feel pass (see project docs
 Update two files in `docs/` and commit them with the task, then push to GitHub so Codex sees the latest:
 - `docs/LOG.md`: add a new entry at the top with the date, Don's request in one line, what was done in 2 to 4 bullets, the files or game objects changed, and anything still open. Keep each entry under 10 lines.
 - `docs/STATE.md`: the current picture of the game: what it is, how it is built, Don's rules, and the open tasks in priority order. Rewrite sections when they change instead of adding to them.
+
+## Shared skills
+Shared skills: before UI, model, Studio or verification work, read `../skills/README.md` and the matching `../skills/<name>/SKILL.md` (github.com/skyler-lab/studio-skills, cloned next to this repo).
