@@ -1,5 +1,13 @@
 # Log
 
+## 2026-10-23: Placing tamed spirits on the base
+Request: place owned spirits on base slots and take them back (server decides), earn cash by rarity, save and restore, list clashes with the old delivery code, test.
+- Studio matched STATE.md. Added BaseAction RemoteFunction to BaseServer (place/take with server checks) and PlacedSpirits attribute; Place and Take back buttons in OwnedSpiritsClient.
+- Play test: Pebble earned exactly 3/s; fake requests refused; TestRejoin kept cash and the placed spirit.
+- Clashes listed in STATE.md (shared slots, old Sell prompt, mutations, FollowClient follower). Nothing deleted.
+- Files: BaseServer, OwnedSpiritsClient, docs. Test switches cleared.
+- Open: keep or drop the Sell prompt on placed spirits. Don to press Ctrl+S.
+
 ## 2026-10-23: Storm turned off
 Request: turn the storm off completely (disable, don't delete), hide the storm HUD, check base, test area and battles, no knockout after battle.
 - Disabled RoundServer, HealthServer, StormClient, ShieldClient. HealthHud hides siren, zone, health bar and bag (SHOW_STORM_HUD = false).

@@ -79,6 +79,10 @@ local function recalc(plr)
 	local incomeMult = 1 + Up.ById.Income.perLevel * math.clamp(plr:GetAttribute("UpIncome") or 0, 0, Up.ById.Income.maxLevel)
 	plr:SetAttribute("CashPerSec", total * incomeMult)
 	plr:SetAttribute("BaseCount", n)
+	-- what is on the base, for the client list: "slot|name|rarity;..."
+	local parts = {}
+	for i = 1, MAX_SLOTS do if b[i] then parts[#parts + 1] = i .. "|" .. b[i].item.name .. "|" .. b[i].item.rarity end end
+	plr:SetAttribute("PlacedSpirits", table.concat(parts, ";"))
 end
 
 local wired = setmetatable({}, { __mode = "k" })
@@ -270,6 +274,56 @@ fn.OnInvoke = function(plr, items)
 		plr:SetAttribute("BaseFullAt", os.clock())
 	end
 	return accepted
+end
+
+-- ===== placing tamed spirits =====
+-- The client only asks; the server checks everything (data loaded, own plot, near it, valid index or slot, free slot).
+local BattleData = require(RS:WaitForChild("BattleData"))
+local PLACE_RANGE = 90 -- placeholder: studs from the centre of your plot to place or take back
+local RarityOf = {}
+for rarity, names in pairs(Data.ByRarity) do for _, n in ipairs(names) do RarityOf[n] = rarity end end
+
+local function ownedList(plr)
+	local raw = plr:GetAttribute("OwnedSpirits") or ""
+	return (raw == "") and {} or string.split(raw, ";")
+end
+
+local baseAction = RS:FindFirstChild("BaseAction")
+if not baseAction then baseAction = Instance.new("RemoteFunction"); baseAction.Name = "BaseAction"; baseAction.Parent = RS end
+baseAction.OnServerInvoke = function(plr, action, arg)
+	if type(action) ~= "string" or type(arg) ~= "number" or arg ~= math.floor(arg) then return false, "bad request" end
+	if not loaded[plr] or not owner[plr] or not bases[plr] then return false, "still loading" end
+	local root = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
+	local pad = plots[owner[plr]]
+	if not root or (root.Position - pad.Position).Magnitude > PLACE_RANGE then return false, "go to your base first" end
+	local b = bases[plr]
+	if action == "place" then
+		local list = ownedList(plr)
+		local name = list[arg]
+		if not name then return false, "you don't have that spirit" end
+		local rarity = RarityOf[name]
+		if not rarity then return false, "unknown spirit" end
+		local free
+		for k = 1, slotCount(plr) do if not b[k] then free = k; break end end
+		if not free then return false, "base is full" end
+		table.remove(list, arg)
+		plr:SetAttribute("OwnedSpirits", table.concat(list, ";"))
+		place(plr, free, { name = name, rarity = rarity, mutation = "None" })
+		recalc(plr)
+		return true, "placed " .. name
+	elseif action == "take" then
+		local e = b[arg]
+		if arg < 1 or arg > MAX_SLOTS or not e then return false, "nothing there" end
+		local list = ownedList(plr)
+		if #list >= BattleData.Tame.MaxOwned then return false, "your spirit list is full" end
+		if e.model then e.model:Destroy() end
+		b[arg] = nil
+		table.insert(list, e.item.name)
+		plr:SetAttribute("OwnedSpirits", table.concat(list, ";"))
+		recalc(plr)
+		return true, "took back " .. e.item.name
+	end
+	return false, "bad request"
 end
 
 -- test hook: pretend the player left and came back

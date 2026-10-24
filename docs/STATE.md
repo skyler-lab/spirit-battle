@@ -1,6 +1,6 @@
 # Spirit Battle: current state
 
-Last updated: 2026-10-23 (taming added)
+Last updated: 2026-10-23 (placing tamed spirits added)
 
 ## What it is
 Roblox Prodigy-style spirit battle game. Working name "Spirit Battle", final name TBD. "Storm Spirits" is the old name and the old design (5-minute storm rounds, grab spirits, deliver to base); that design is dropped. Owner: Don (Roblox user SkylerH007). Not published. Halloween 2026 target.
@@ -39,12 +39,12 @@ Battle (the new game, built and partly tested):
 - `StarterPlayerScripts.Demo`: identical copy of BattleFXPack.Demo. DISABLED 2026-10-23 (Enabled = false, not deleted) because its arena, camera and dialog covered the real battle. The Enabled flag lives only in the place file, not in `src/`.
 
 Base and spirits (keepers):
-- `ServerScriptService.BaseServer`: 6 plots in `Workspace.GreyBox` (Plot1..6), 6 base slots per player (up to 9 with the Slots upgrade), spirits on slots earn cash per second, sell prompt on each spirit (60x per-second). Saves cash, slots, upgrades, coils, shields and owned spirits (`owned`, ";"-separated names from OwnedSpirits) to DataStore `StormSpiritsV1`; unpublished Studio uses an in-memory fake store. `ServerStorage.TestRejoin` BindableFunction tests save and load. Receives deliveries through `ServerStorage.TryDeliver`.
+- `ServerScriptService.BaseServer`: 6 plots in `Workspace.GreyBox` (Plot1..6), 6 base slots per player (up to 9 with the Slots upgrade), spirits on slots earn cash per second, sell prompt on each spirit (60x per-second). Saves cash, slots, upgrades, coils, shields and owned spirits (`owned`, ";"-separated names from OwnedSpirits) to DataStore `StormSpiritsV1`; unpublished Studio uses an in-memory fake store. `ServerStorage.TestRejoin` BindableFunction tests save and load. Receives old storm-era deliveries through `ServerStorage.TryDeliver`. Placing tamed spirits: RemoteFunction `ReplicatedStorage.BaseAction` ("place", owned-list index) or ("take", slot). The server checks data loaded, own plot, within 90 studs of the plot centre (PLACE_RANGE placeholder), whole-number argument, the spirit is really in OwnedSpirits, a free slot. Place moves the name out of OwnedSpirits into the first free slot (rarity looked up from SpiritData.ByRarity, mutation None); take moves it back (capped by BattleData.Tame.MaxOwned). Player attribute PlacedSpirits ("slot|name|rarity;...") mirrors the base for the client. Placed spirits use the existing slot save, so they and cash restore on rejoin.
 - `ReplicatedStorage.SpiritData`: rarities Common to Secret, cash per second 1, 3, 10, 30, 100, 300, 1000, mutations Big x3 and Shiny x2, placeholder roster (Wood, Breeze, Ember, Pebble, Nature, Light, Gale, Blaze, Boulder, Pumpkin, Mother Earth, Inferno, Tempest, Mountain, Void, Eclipse, Harvest Moon), zone weights from the storm era.
 - `ReplicatedStorage.SpiritModels`: chunky multi-part models built in code, front faces -Z. Only Wood and Breeze have real models; others use BuildOrb recolored by element.
 - `ReplicatedStorage.SpiritRig`: code-only animation for those models (walk, hover, idle).
 - `ReplicatedStorage.UpgradeData` + `ServerScriptService.UpgradeServer` + `StarterPlayerScripts.ShopClient`: plain shop near `Workspace.GreyBox.CenterShop` (within 40 studs). Tracks Health, Bag, Slots, Income, coils, Shield item. All prices 0. Health, bag and shield may need rethinking under the pivot.
-- `StarterPlayerScripts.OwnedSpiritsClient`: TEMPORARY plain "My spirits (N)" list on the left edge, from OwnedSpirits. Hidden during battles.
+- `StarterPlayerScripts.OwnedSpiritsClient`: TEMPORARY plain panel on the left edge: "My spirits (N)" with a Place button per spirit, "On my base (N)" with a Take back button per slot, and a one-line result ("Done: placed Ember" / "Can't: go to your base first"). Hidden during battles.
 - `ReplicatedStorage.UiArt`: empty placeholders for UI images.
 
 Storm: TURNED OFF 2026-10-23 at Don's request (disabled, nothing deleted). To turn it back on:
@@ -68,18 +68,27 @@ Place contents (Studio, 2026-10-23): Workspace has Baseplate, SpawnLocation at (
 - Battle camera moved further back 2026-10-23 (Wood vs Breeze): both fully in view and closer in size (Wood still a bit larger; its model is taller). RUN tested: battle ends, camera and FOV return to normal.
 - Real battles with no test switches, 2026-10-23: won against Pebble (Strike shots visible mid-flight as a small green ball, "It's super effective!", "Pebble was defeated!"); tamed Pebble with the normal random roll (68% chance at 10 HP, succeeded first try), list showed Pebble.
 - Effects are visible but small and faint. Damage numbers were not seen in screenshots. A win has no faint or reward effect: the foe just stays until the battle closes.
+- Placing tested in Play 2026-10-23: tamed Pebble (with test switches), placed it on slot 1; cash rose 15 to 45 in 10.0s = 3.00 per second, matching Uncommon 3. Take back and place again worked. Refused: placing from the test area, a string or 1.5 argument, an unknown action, a 5th spirit that doesn't exist, taking from an empty slot. TestRejoin kept cash (204) and Pebble on slot 1, earning resumed at 3/s.
+- Old grab-and-deliver code that could clash with placing (nothing changed or deleted):
+  - Shared slots: BaseServer's TryDeliver handler puts storm-era spirits into the same base slots. SpiritServer is idle now (waits for the disabled round clock), so this only matters if the storm comes back.
+  - Every placed spirit, tamed or not, still gets the old "Sell for 60x" prompt. Selling a tamed spirit destroys it for good.
+  - Storm-era spirits carry Big/Shiny mutations; Take back keeps only the name, so a mutation would be lost. Only matters for old saves.
+  - SpiritServer still runs its join setup (BagCount/BagItems) before it stalls. Harmless.
+  - FollowClient reads BagItems and, while Workspace attribute DevShowcase is true, shows a Wood follower behind the local player even with an empty bag.
+  - The SpiritDelivered fly-in animation is only for delivery; placed spirits just appear.
 - Storm off, checked in Play 2026-10-23: home base loads (plot, save data, cash HUD, spirits list), no siren or health bar; test area has clear sky and no damage (6s, no knockout); battle works (low-energy reject, Charge, Strike, RUN); 8s after the battle the player is still in the test area, no knockout. No errors from game scripts.
 - Placeholder orbs (Pebble, Ember) are neon, so Pebble's brown reads bright yellow, and the orb floats beside its platform.
 
 ## Open tasks (priority order)
 1. Ask Don what to do with the EV_ parts in Workspace. Placeholder orbs look odd (neon, floating); fine until real models exist.
 2. Wire BattleFXPack into BattleClient (or replace BattleClient's placeholder effects with the pack) and test win, RUN and visible effects.
-3. Pick which owned spirit fights (BattleSpirit is still always Wood) and a real team/inventory UI.
-4. Place tamed spirits on the home base (replace the storm-era delivery path).
-5. Home base as a real map (now grey cubes). Plan the look and what "home customizing" means.
-6. Remove or retire the storm-era scripts and the old HUD once nothing depends on them. Do not delete without Don's OK.
-7. Fire island, then more islands and the world map.
-8. Later: shops and items (economy first, then prices), evolution, friendly battles, customizing, rebirth, tutorial, real UI and art, publish and real DataStore test.
+3. Decide whether placed spirits keep the old Sell prompt.
+4. Pick which owned spirit fights (BattleSpirit is still always Wood) and a real team/inventory UI.
+5. Place tamed spirits on the home base (replace the storm-era delivery path).
+6. Home base as a real map (now grey cubes). Plan the look and what "home customizing" means.
+7. Remove or retire the storm-era scripts and the old HUD once nothing depends on them. Do not delete without Don's OK.
+8. Fire island, then more islands and the world map.
+9. Later: shops and items (economy first, then prices), evolution, friendly battles, customizing, rebirth, tutorial, real UI and art, publish and real DataStore test.
 
 ## Open questions (unanswered)
 Final name; teleport vs guided travel on the world map; what "home customizing" means; how finished the home base must be before battles; how many spirits per battle; does a wild spirit fight back and what is the taming chance; remove the storm for good (it is off for now); how many elements.
