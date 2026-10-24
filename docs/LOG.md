@@ -1,5 +1,9 @@
 # Log
 
+## 2026-10-23: Keep the Sell prompt
+Request: keep the Sell prompt on placed spirits.
+- Decision recorded in STATE.md; open task removed. No code or game objects changed.
+
 ## 2026-10-23: Placing tamed spirits on the base
 Request: place owned spirits on base slots and take them back (server decides), earn cash by rarity, save and restore, list clashes with the old delivery code, test.
 - Studio matched STATE.md. Added BaseAction RemoteFunction to BaseServer (place/take with server checks) and PlacedSpirits attribute; Place and Take back buttons in OwnedSpiritsClient.
