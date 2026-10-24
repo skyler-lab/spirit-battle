@@ -1,12 +1,5 @@
 # Log
 
-## 2026-10-23: Home base map plan (no build)
-Request: look at the current base and write a short plan for a real map, with a top-down screenshot and sketch.
-- Measured the base in Studio: hub disk, 6 plots in a ring, shop in the centre, spawn and portal side by side, storm rings and 98 pillars.
-- Wrote docs/HOME-BASE-PLAN.md with docs/img/base-current-top.jpg and docs/img/base-plan-sketch.svg.
-- Files: docs only. No game objects changed.
-- Open: Don's answer on the one question, then build.
-
 ## 2026-10-23: Keep the Sell prompt
 Request: keep the Sell prompt on placed spirits.
 - Decision recorded in STATE.md; open task removed. No code or game objects changed.
