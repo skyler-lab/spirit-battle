@@ -1,5 +1,12 @@
 # Log
 
+## 2026-10-23: Island fixes
+Request: spawn on the ground facing the shop, invisible walls round the test area, teleport pads at about 8 studs, disable the showcase Wood and Breeze. Leave signs, island edge and borders.
+- Spawn moved down onto the path (0, 2.19, -70) facing the shop. TestArea.EdgeWalls added. Both teleport prompts: range 12, line of sight off. DevShowcase script disabled.
+- Play test: spawn faces the shop; portal from 8.9 and return pad from 9.2 studs; test-area edge stops the player; no showcase spirits.
+- Files: src/ServerScriptService/DevShowcase.meta.json, docs. Old spawn and prompt values saved on ServerStorage.BeforeHomeIslandR1.
+- Open: Wood follower (FollowClient, DevShowcase attribute). Don to press Ctrl+S.
+
 ## 2026-10-23: Home base island built
 Request: build the island from docs/HOME-BASE-PLAN.md with plain parts, keep plot/shop/spawn names and positions, stop players walking off, test the full route.
 - Backed up to ServerStorage.BeforeHomeIslandR1; storm rings, hub and pillars moved to ServerStorage.StormMapHidden. Built Workspace.HomeIsland (island, sand edge, plaza, paths, plot borders, signs, 72 invisible walls); baseplate recoloured as water; portal moved to the east edge with a frame.
