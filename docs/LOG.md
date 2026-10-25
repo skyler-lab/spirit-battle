@@ -10,6 +10,14 @@ One line each, newest first. Dates are when Don decided; "reported 2026-10-24" m
 - 2026-10-23: Sell prompt on placed spirits KEPT. Reason: the economy is not designed yet.
 - 2026-10-23: storm turned OFF (disabled, not deleted). Reason: the pivot dropped it.
 
+## 2026-10-24: Working copy and studio-skills
+Request: confirm both copies match, pick the working copy, clone studio-skills from skyler-lab if missing, list and vet every skill file before use.
+- Both copies point to github.com/skyler-lab/spirit-battle and are at commit 4715bb5.
+- Working copy is now RobloxStudio\spirit-battle; written in CLAUDE.md and STATE.md.
+- Cloned skyler-lab/studio-skills to RobloxStudio\studio-skills. Same commit and text as RobloxStudio\skills. Five text files, no scripts, nothing that runs commands, touches credentials, deletes files or sends data.
+- Files: CLAUDE.md, docs/STATE.md, docs/LOG.md. No game objects changed.
+- Open: Don's OK before using any skill.
+
 ## 2026-10-24: Shared skills, decision rule, decision log
 Request: pull, read the shared skills line and the skills, add the approvals/rejections rule, log past decisions, check STATE.md against Studio.
 - Pulled Don's commit pointing CLAUDE.md at ../skills. From this folder ../skills does not exist; the skills are at C:\Users\80hsd\RobloxStudio\skills (ui-principles, model-building, studio-mcp-lessons, verification).

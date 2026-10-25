@@ -1,6 +1,6 @@
 # Spirit Battle: current state
 
-Last updated: 2026-10-24 (decisions logged, STATE checked against the saved place)
+Last updated: 2026-10-24 (working copy set, studio-skills cloned)
 
 ## What it is
 Roblox Prodigy-style spirit battle game. Working name "Spirit Battle", final name TBD. "Storm Spirits" is the old name and the old design (5-minute storm rounds, grab spirits, deliver to base); that design is dropped. Owner: Don (Roblox user SkylerH007). Not published. Halloween 2026 target.
@@ -10,8 +10,8 @@ Loop (planned): walk up to a wild elemental spirit, fight it in a 1v1 turn battl
 Reference game: "Catch a Brainrot". Copy its mechanics, pacing, flow and layout as a base, not its creatures, models, arena art, UI art or effect art.
 
 ## Where the work is
-- Project folder: `C:\Users\80hsd\RobloxGames\SpiritBattle` (git, branch main). A second clone of the same repo exists at `C:\Users\80hsd\RobloxStudio\spirit-battle` (the studio-lead workspace); pull before working in either.
-- Shared skills: `C:\Users\80hsd\RobloxStudio\skills` (github.com/skyler-lab/studio-skills): ui-principles, model-building, studio-mcp-lessons, verification. CLAUDE.md says `../skills`, which only resolves from the RobloxStudio clone.
+- Working copy: `C:\Users\80hsd\RobloxStudio\spirit-battle` (from 2026-10-24). `C:\Users\80hsd\RobloxGames\SpiritBattle` is an old copy of the same repo; don't work there. Run `git pull` here before every task. GitHub remote for both: github.com/skyler-lab/spirit-battle.
+- Shared skills: `C:\Users\80hsd\RobloxStudio\studio-skills`, cloned from github.com/skyler-lab/studio-skills (the folder name CLAUDE.md asks for). The studio-lead copy `C:\Users\80hsd\RobloxStudio\skills` is the same repo at the same commit. Skills: ui-principles, model-building, studio-mcp-lessons, verification. Pull it at the start of every session.
 - GitHub: https://github.com/skyler-lab/spirit-battle (private, account skyler-lab). Push after every commit so Codex sees the latest.
 - Place file: `C:\Users\80hsd\OneDrive\Documents\ChatGPT\Roblox team\work\Place1.rbxl`. Opened in Studio as "Place1.rbxl". Parts, models and attributes live only in the place. Don saves it with Ctrl+S. Last saved 2026-10-23 23:11 (270 KB); checked 2026-10-24 by decoding the file: it contains the island, edge walls, portal frame, taming, placing, battle camera, storm HUD switch, the spawn backup and DevShowcase = false.
 - That `Roblox team` folder also holds the vacuum game files. Never touch the vacuum place or VACUUM_SAFETY_COPY.
