@@ -71,7 +71,7 @@ Update two files in `docs/` and commit them with the task, then push to GitHub s
 - `docs/STATE.md`: the current picture of the game: what it is, how it is built, Don's rules, and the open tasks in priority order. Rewrite sections when they change instead of adding to them.
 
 ## Shared skills
-Shared skills: before UI, model, Studio or verification work, read `../skills/README.md` and the matching `../skills/<name>/SKILL.md` (github.com/skyler-lab/studio-skills, cloned next to this repo).
+Shared skills live in the GitHub repo skyler-lab/studio-skills. If a folder named studio-skills is not next to this repo, clone it there first, then pull it at the start of every session before working.
 
 ## 9. Approvals and rejections
 Whenever Don says something was approved or rejected, record it in `docs/LOG.md` under "Decisions" as one line: date, what, approved or rejected, and the reason.
