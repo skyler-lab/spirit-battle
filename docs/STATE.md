@@ -1,6 +1,6 @@
 # Spirit Battle: current state
 
-Last updated: 2026-10-23 (home base island built)
+Last updated: 2026-10-24 (decisions logged, STATE checked against the saved place)
 
 ## What it is
 Roblox Prodigy-style spirit battle game. Working name "Spirit Battle", final name TBD. "Storm Spirits" is the old name and the old design (5-minute storm rounds, grab spirits, deliver to base); that design is dropped. Owner: Don (Roblox user SkylerH007). Not published. Halloween 2026 target.
@@ -10,11 +10,12 @@ Loop (planned): walk up to a wild elemental spirit, fight it in a 1v1 turn battl
 Reference game: "Catch a Brainrot". Copy its mechanics, pacing, flow and layout as a base, not its creatures, models, arena art, UI art or effect art.
 
 ## Where the work is
-- Project folder: `C:\Users\80hsd\RobloxGames\SpiritBattle` (git, branch main).
+- Project folder: `C:\Users\80hsd\RobloxGames\SpiritBattle` (git, branch main). A second clone of the same repo exists at `C:\Users\80hsd\RobloxStudio\spirit-battle` (the studio-lead workspace); pull before working in either.
+- Shared skills: `C:\Users\80hsd\RobloxStudio\skills` (github.com/skyler-lab/studio-skills): ui-principles, model-building, studio-mcp-lessons, verification. CLAUDE.md says `../skills`, which only resolves from the RobloxStudio clone.
 - GitHub: https://github.com/skyler-lab/spirit-battle (private, account skyler-lab). Push after every commit so Codex sees the latest.
-- Place file: `C:\Users\80hsd\OneDrive\Documents\ChatGPT\Roblox team\work\Place1.rbxl`. Opened in Studio as "Place1.rbxl". Parts, models and attributes live only in the place. Don saves it with Ctrl+S; the on-disk copy was last saved 2026-10-20.
+- Place file: `C:\Users\80hsd\OneDrive\Documents\ChatGPT\Roblox team\work\Place1.rbxl`. Opened in Studio as "Place1.rbxl". Parts, models and attributes live only in the place. Don saves it with Ctrl+S. Last saved 2026-10-23 23:11 (270 KB); checked 2026-10-24 by decoding the file: it contains the island, edge walls, portal frame, taming, placing, battle camera, storm HUD switch, the spawn backup and DevShowcase = false.
 - That `Roblox team` folder also holds the vacuum game files. Never touch the vacuum place or VACUUM_SAFETY_COPY.
-- Scripts: `src/` holds all 37 scripts, byte-identical to Studio as of 2026-10-23 (after taming). Rojo naming (`.server.luau`, `.client.luau`, `.luau`) but no Rojo project yet. Studio is the live source: after a Studio edit, copy the script back to `src/` and commit.
+- Scripts: `src/` holds all 37 scripts, last confirmed byte-identical to Studio on 2026-10-23 (the placing edits were checked file by file afterwards). Disabled scripts are recorded as `<Script>.meta.json` with `"Enabled": false`. Rojo naming (`.server.luau`, `.client.luau`, `.luau`) but no Rojo project yet. Studio is the live source: after a Studio edit, copy the script back to `src/` and commit.
 - HttpService is off in the place. Scripts were pulled through the Studio MCP, not over HTTP.
 - Plan doc: "Spirit Battle Game: Plan v1" https://claude.ai/code/artifact/119942b6-e1b7-4543-bf62-923a6f8c9055
 
@@ -61,7 +62,11 @@ Storm era scripts (in the place, expected to go under the pivot):
 
 Place contents (Studio, 2026-10-23, after the home island): Workspace has Baseplate (recoloured as water: SmoothPlastic, blue, its Texture set to Transparency 1), SpawnLocation at (0, 2.19, -70), sitting on the path and facing the shop (+Z) (old CFrame saved on the backup folder as SpawnCFrameBefore), `GreyBox` (now only Plot1 to Plot6 and CenterShop, same names and positions), `HomeIsland` (SandEdge and Grass discs 464/444 across, Plaza disc 116 across, `Paths` (6 to plots, 1 to the portal), `PlotBorders` (wood rails per plot with an 18-stud gap facing the plaza, plain sign post and blank board), `EdgeWalls` (72 invisible walls, radius 234, 44 high)), `TestArea` (Ground 160x160 at (600,0,0), 4 WildSpot parts, `EdgeWalls` (4 invisible walls, 44 high, just outside the ground), ReturnPad, Dest now (188, 5.65, 0) just inside the island's portal end), `TestPortal` (ToTestArea pad moved to (205, 2.15, 0) on the island's east edge, plus `PortalFrame`: two purple posts and a beam). Both teleport prompts (ToTestArea, ReturnPad): MaxActivationDistance 12, RequiresLineOfSight false, hold E 0.3s (old values saved on the backup folder), and `EV_Ground` plus `EV_F1` to `EV_F5` (y=500, no script references them, origin unknown). ServerStorage holds TryDeliver, `BeforeHomeIslandR1` (backup of GreyBox, TestPortal and ReturnPad before the island; original Baseplate colour, material and texture transparency saved as attributes) and `StormMapHidden` (Hub disk, Zone1 to Zone5 rings and 98 Pillars, moved out of GreyBox). StreamingEnabled is on. StarterGui is empty (all UI is built by scripts). Plan and images: docs/HOME-BASE-PLAN.md, docs/img/.
 
+## Art direction
+- Voxel model style APPROVED (the reference look). The orange lizard sample was rejected as too close to an existing character. Follow the model-building skill and keep creatures original.
+
 ## Tested and untested
+- Don's playtest verdict (reported 2026-10-24): "slow and boring, nothing felt good", because battle effects and animation are missing.
 - Tested and working: battle entry, menu, turns, energy, rejection when energy is too low, element math (Wood Strike did 10 to Ember, Ember Strike did 30 to Wood), lose flow back to spawn. Save and load through TestRejoin.
 - Taming tested 2026-10-23 in Play with the test hooks (Pebble at 20% health, 47% chance shown): a forced fail used the turn and Pebble acted; energy went up by 1 at turn end; a forced success ended the battle with "You tamed Pebble!" and the list showed Pebble; after TestRejoin the list still showed Pebble. The random roll itself (no hook) was not exercised.
 - Not tested: win ending, whether effects are visible on screen, the BattleFXPack sequences inside a real battle, the TAME reject message above 30%.
@@ -84,7 +89,7 @@ Place contents (Studio, 2026-10-23, after the home island): Workspace has Basepl
 
 ## Open tasks (priority order)
 1. Ask Don what to do with the EV_ parts in Workspace. Placeholder orbs look odd (neon, floating); fine until real models exist.
-2. Wire BattleFXPack into BattleClient (or replace BattleClient's placeholder effects with the pack) and test win, RUN and visible effects.
+2. Battle feel (Don's playtest: slow and boring). BattleFXPack is NOT to be connected yet: the chat building it isn't finished. Wait for it, then wire it into BattleClient and test effects, win and faint.
 3. Pick which owned spirit fights (BattleSpirit is still always Wood) and a real team/inventory UI.
 4. Home island: decide on the blank sign boards. Then plan what "home customizing" means and the art list in docs/HOME-BASE-PLAN.md.
 5. Remove or retire the storm-era scripts and the old HUD once nothing depends on them. Do not delete without Don's OK.
@@ -92,7 +97,7 @@ Place contents (Studio, 2026-10-23, after the home island): Workspace has Basepl
 7. Later: shops and items (economy first, then prices), evolution, friendly battles, customizing, rebirth, tutorial, real UI and art, publish and real DataStore test.
 
 ## Open questions (unanswered)
-Final name; teleport vs guided travel on the world map; what "home customizing" means; how finished the home base must be before battles; how many spirits per battle; does a wild spirit fight back and what is the taming chance; remove the storm for good (it is off for now); how many elements.
+Final name; teleport vs guided travel on the world map; what "home customizing" means; how many spirits per battle; final taming chance (placeholder: 25% at 30% health up to 90% near 0; wild spirits do fight back); remove the storm for good (it is off for now); how many elements.
 
 ## Technical notes
 - Studio MCP: call list_roblox_studios first, studio_id on every call. Edit datamodel is unavailable during Play; stop Play first. Server calls time out around 60s. screen_capture works in Play.
