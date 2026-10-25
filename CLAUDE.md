@@ -72,3 +72,6 @@ Update two files in `docs/` and commit them with the task, then push to GitHub s
 
 ## Shared skills
 Shared skills: before UI, model, Studio or verification work, read `../skills/README.md` and the matching `../skills/<name>/SKILL.md` (github.com/skyler-lab/studio-skills, cloned next to this repo).
+
+## 9. Approvals and rejections
+Whenever Don says something was approved or rejected, record it in `docs/LOG.md` under "Decisions" as one line: date, what, approved or rejected, and the reason.

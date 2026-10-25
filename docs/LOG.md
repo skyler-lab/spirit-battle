@@ -1,5 +1,23 @@
 # Log
 
+## Decisions (approved / rejected)
+One line each, newest first. Dates are when Don decided; "reported 2026-10-24" means Don told Claude on that date and the decision date is not recorded.
+- Reported 2026-10-24: playtest verdict "slow and boring, nothing felt good". Reason: battle effects and animation are missing.
+- Reported 2026-10-24: battle effects pack (BattleFXPack) NOT connected yet. Reason: the chat building it isn't finished.
+- Reported 2026-10-24: voxel model style APPROVED. Reason: it is the reference look. The orange lizard sample REJECTED as too close to an existing character.
+- 2026-10-23: Wood follower turned OFF (Workspace attribute DevShowcase false). Reason: leftover from the old game.
+- 2026-10-23: home base is an island APPROVED (built with plain parts). Reason: Don's choice for the home base map.
+- 2026-10-23: Sell prompt on placed spirits KEPT. Reason: the economy is not designed yet.
+- 2026-10-23: storm turned OFF (disabled, not deleted). Reason: the pivot dropped it.
+
+## 2026-10-24: Shared skills, decision rule, decision log
+Request: pull, read the shared skills line and the skills, add the approvals/rejections rule, log past decisions, check STATE.md against Studio.
+- Pulled Don's commit pointing CLAUDE.md at ../skills. From this folder ../skills does not exist; the skills are at C:\Users\80hsd\RobloxStudio\skills (ui-principles, model-building, studio-mcp-lessons, verification).
+- Added section 9 (approvals and rejections) to CLAUDE.md and a Decisions list at the top of this log.
+- Checked STATE.md against Studio and fixed stale lines.
+- Files: CLAUDE.md, docs/LOG.md, docs/STATE.md. No game objects changed.
+- Open: two copies of this repo exist (RobloxGames\SpiritBattle and RobloxStudio\spirit-battle).
+
 ## 2026-10-23: Wood follower off
 Request: turn off the Wood follower by setting the DevShowcase workspace setting off, delete nothing.
 - Set Workspace attribute DevShowcase = false. Play check: no follower or showcase spirits near the player.
