@@ -1,6 +1,7 @@
 # Spirit Battle Game: Full Handoff (updated 2026-10-21)
 
 Working copy: `C:\Users\80hsd\RobloxStudio\spirit-battle` (from 2026-10-24). `C:\Users\80hsd\RobloxGames\SpiritBattle` is an old copy of the same repo; don't work there. Run `git pull` here before every task.
+The studio-lead CLAUDE.md in the parent folder (`C:\Users\80hsd\RobloxStudio\CLAUDE.md`) applies only to the Studio Lead session, not here; in this folder, building game code and updating docs/STATE.md and docs/LOG.md is the job.
 
 Read all of this first in a new chat. Owner: Don Halbert. Place file: Place1.rbxl (Studio id changes on reconnect; always call list_roblox_studios). Never touch the vacuum game place or VACUUM_SAFETY_COPY. Don also saved a backup copy of the old storm version of Place1.
 
