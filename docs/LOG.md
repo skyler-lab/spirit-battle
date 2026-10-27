@@ -2,6 +2,7 @@
 
 ## Decisions (approved / rejected)
 One line each, newest first. Dates are when Don decided; "reported 2026-10-24" means Don told Claude on that date and the decision date is not recorded.
+- 2026-10-27: this session takes over the battle look and feel using BattleFXPack, instead of waiting for the other chat, APPROVED. Reason: battles are still not good and the pack is already in the place.
 - 2026-10-27: battles after the faster pacing REJECTED as still "not good, we could do so much better". Reason: speed alone did not fix the feel.
 - 2026-10-24: background runs (including /morning) move to RobloxStudio\spirit-battle APPROVED. Reason: one working copy for all spirit battle work.
 - 2026-10-24: use of the four studio skills (ui-principles, model-building, studio-mcp-lessons, verification) APPROVED. Reason: Don reviewed the vetted list; plain text, nothing risky.
@@ -12,6 +13,13 @@ One line each, newest first. Dates are when Don decided; "reported 2026-10-24" m
 - 2026-10-23: home base is an island APPROVED (built with plain parts). Reason: Don's choice for the home base map.
 - 2026-10-23: Sell prompt on placed spirits KEPT. Reason: the economy is not designed yet.
 - 2026-10-23: storm turned OFF (disabled, not deleted). Reason: the pivot dropped it.
+
+## 2026-10-27: Battle feel plan
+Request: take over the battle look and feel here using the effects pack in the place; plan first.
+- Read BattleFXPack and BattleClient/BattleServer. Wrote docs/BATTLE-FEEL-PLAN.md: 6 steps (connect pack, our 4 moves in element colours, hit feel, real endings, idle motion, shared timing).
+- Left out Bite/Splash/Firework (copy reference effect art), menu restyle, per-spirit abilities, sound.
+- Files: docs only. No code or game objects changed.
+- Open: Don's OK to build.
 
 ## 2026-10-27: Faster battle pacing
 Request: speed up battle pacing now, without waiting for the effects pack.
