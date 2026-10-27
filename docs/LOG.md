@@ -2,6 +2,7 @@
 
 ## Decisions (approved / rejected)
 One line each, newest first. Dates are when Don decided; "reported 2026-10-24" means Don told Claude on that date and the decision date is not recorded.
+- 2026-10-27: fighting redesign before models APPROVED. Reason: Don said "Yes. Plan a redesign of the fighting first".
 - 2026-10-27: battles after the battle feel pass REJECTED: "it still sucks". Reason (Don): looks ugly, no models, boring to play, too slow, "the fighting sucks".
 - 2026-10-27: battle feel plan (docs/BATTLE-FEEL-PLAN.md, steps 1 to 6) APPROVED to build. Reason: Don said "Yes, build steps 1 to 6".
 - 2026-10-27: this session takes over the battle look and feel using BattleFXPack, instead of waiting for the other chat, APPROVED. Reason: battles are still not good and the pack is already in the place.
@@ -15,6 +16,13 @@ One line each, newest first. Dates are when Don decided; "reported 2026-10-24" m
 - 2026-10-23: home base is an island APPROVED (built with plain parts). Reason: Don's choice for the home base map.
 - 2026-10-23: Sell prompt on placed spirits KEPT. Reason: the economy is not designed yet.
 - 2026-10-23: storm turned OFF (disabled, not deleted). Reason: the pivot dropped it.
+
+## 2026-10-27: Fight redesign plan
+Request: plan a redesign of the fighting (own abilities per spirit, real choices, faster turns); plan only.
+- Wrote docs/FIGHT-REDESIGN-PLAN.md: both spirits act at once (turn 2s or less), Attack/Block/Charge that beat each other, 3 own abilities per spirit (Wood, Ember, Pebble, Breeze), burn/stun/heal/shield, wild spirits with plans and warning signs.
+- Check before Don sees it: simulation of thousands of fights, then Studio test.
+- Files: docs only. No code or game objects changed.
+- Open: Don's OK to build.
 
 ## 2026-10-27: Battle feel pass (BattleFXPack)
 Request: build steps 1 to 6 of the battle feel plan, screenshots after each step.
