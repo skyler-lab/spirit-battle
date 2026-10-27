@@ -70,39 +70,49 @@ local function chooseFoe(b)
 	return opts[math.random(#opts)]
 end
 
+-- one spirit's move as events: its "used X!" line, then its effect. Blocks were already decided for both sides.
+local function act(b, side, id, targetBlocks, push)
+	local m = Data.Moves[id]
+	local isMe = side == "me"
+	local other = isMe and "foe" or "me"
+	push({ k = "say", who = side, move = id, text = (isMe and b.myName or b.foeName) .. " used " .. m.name .. "!" })
+	if m.kind == "charge" then
+		if isMe then b.myEn = math.min(Data.MaxEnergy, b.myEn + m.gain) else b.foeEn = math.min(Data.MaxEnergy, b.foeEn + m.gain) end
+		push({ k = "fx", type = "charge", who = side })
+	elseif m.kind == "block" then
+		push({ k = "fx", type = "block", who = side })
+	elseif m.kind == "attack" then
+		if targetBlocks then
+			-- a block that stops an attack refunds its own cost
+			local blockCost = Data.Moves.Block.cost
+			if isMe then b.foeEn = math.min(Data.MaxEnergy, b.foeEn + blockCost) else b.myEn = math.min(Data.MaxEnergy, b.myEn + blockCost) end
+			push({ k = "blocked", who = other, by = side, move = id })
+		else
+			local mult = isMe and Data.multiplier(b.myEl, b.foeEl) or Data.multiplier(b.foeEl, b.myEl)
+			local dmg = math.floor(m.power * mult)
+			if isMe then b.foeHp = math.max(0, b.foeHp - dmg) else b.myHp = math.max(0, b.myHp - dmg) end
+			push({ k = "hit", who = side, dmg = dmg, mult = mult, move = id })
+		end
+	end
+end
+
 local function resolve(b, myId)
 	local foeId = chooseFoe(b)
 	local mm, fm = Data.Moves[myId], Data.Moves[foeId]
 	local evs = {}
 	local function push(e) e.s = snap(b); table.insert(evs, e) end
 	b.myEn -= mm.cost; b.foeEn -= fm.cost
-	push({ k = "say", who = "me", text = b.myName .. " used " .. mm.name .. "!" })
-	push({ k = "say", who = "foe", text = b.foeName .. " used " .. fm.name .. "!" })
-	if mm.kind == "charge" then b.myEn = math.min(Data.MaxEnergy, b.myEn + mm.gain); push({ k = "fx", type = "charge", who = "me" }) end
-	if fm.kind == "charge" then b.foeEn = math.min(Data.MaxEnergy, b.foeEn + fm.gain); push({ k = "fx", type = "charge", who = "foe" }) end
-	if mm.kind == "block" then push({ k = "fx", type = "block", who = "me" }) end
-	if fm.kind == "block" then push({ k = "fx", type = "block", who = "foe" }) end
-	-- attacks are worked out from the same starting state so both land in the same turn
-	local myDmg, foeDmg, myBlocked, foeBlocked = 0, 0, false, false
-	local myMult = Data.multiplier(b.myEl, b.foeEl)
-	local foeMult = Data.multiplier(b.foeEl, b.myEl)
-	if mm.kind == "attack" then
-		if fm.kind == "block" then foeBlocked = true; b.foeEn = math.min(Data.MaxEnergy, b.foeEn + fm.cost)
-		else myDmg = math.floor(mm.power * myMult) end
+	local myBlocks, foeBlocks = mm.kind == "block", fm.kind == "block"
+	-- blocks go up first, then you act, then the wild spirit. A spirit knocked out before its move does not act.
+	local order = {}
+	if myBlocks then table.insert(order, "me") end
+	if foeBlocks then table.insert(order, "foe") end
+	if not myBlocks then table.insert(order, "me") end
+	if not foeBlocks then table.insert(order, "foe") end
+	for _, side in ipairs(order) do
+		if side == "me" and b.myHp > 0 then act(b, "me", myId, foeBlocks, push)
+		elseif side == "foe" and b.foeHp > 0 then act(b, "foe", foeId, myBlocks, push) end
 	end
-	if fm.kind == "attack" then
-		if mm.kind == "block" then myBlocked = true; b.myEn = math.min(Data.MaxEnergy, b.myEn + mm.cost)
-		else foeDmg = math.floor(fm.power * foeMult) end
-	end
-	if mm.kind == "attack" then
-		if foeBlocked then push({ k = "blocked", who = "foe" })
-		else b.foeHp = math.max(0, b.foeHp - myDmg); push({ k = "hit", who = "me", dmg = myDmg, mult = myMult }) end
-	end
-	if fm.kind == "attack" then
-		if myBlocked then push({ k = "blocked", who = "me" })
-		else b.myHp = math.max(0, b.myHp - foeDmg); push({ k = "hit", who = "foe", dmg = foeDmg, mult = foeMult }) end
-	end
-	-- double knock-out counts as a win for the player (placeholder rule)
 	if b.foeHp <= 0 then push({ k = "end", result = "win", text = b.foeName .. " was defeated!" }); return evs, "win" end
 	if b.myHp <= 0 then push({ k = "end", result = "lose", text = b.myName .. " fainted!" }); return evs, "lose" end
 	b.myEn = math.min(Data.MaxEnergy, b.myEn + Data.TurnEnergy)
@@ -154,7 +164,11 @@ local function buildStage(player, myName, foeName)
 	local function model(name, species, platPos, lookAt)
 		local cf = CFrame.lookAt(platPos + Vector3.new(0, 2.7, 0), Vector3.new(lookAt.X, platPos.Y + 2.7, lookAt.Z))
 		local m = buildSpirit(species, cf)
-		m.Name = name; m:ScaleTo(2); m.Parent = stage
+		m.Name = name; m:ScaleTo(2)
+		-- arena only: a placeholder orb sits on its platform (not floating high) and is not neon, so hits land on it
+		local orb = m:FindFirstChild("Orb")
+		if orb and m.PrimaryPart then orb.CFrame = m.PrimaryPart.CFrame; orb.Material = Enum.Material.SmoothPlastic end
+		m.Parent = stage
 		return m
 	end
 	model("MyModel", myName, myPlat, foePlat)
@@ -203,7 +217,10 @@ end
 
 local function totalTime(evs)
 	local t = 0
-	for _, e in ipairs(evs) do t += Data.EventTime[e.k] or 0 end
+	for _, e in ipairs(evs) do t += Data.eventTime(e) end
+	-- TEST HOOK (Studio only): Workspace attribute TestEndHold (seconds) holds the last frame of a battle for screenshots
+	local hold = RunService:IsStudio() and workspace:GetAttribute("TestEndHold")
+	if type(hold) == "number" and evs[#evs] and evs[#evs].k == "end" then t += math.clamp(hold, 0, 15) end
 	return t
 end
 
@@ -239,17 +256,9 @@ local function tameTurn(player, b)
 	end
 	push({ k = "say", who = "foe", text = b.foeName .. " broke free!" })
 	-- the wild spirit's move (the player made no move, so nothing of theirs blocks)
-	local fm = Data.Moves[chooseFoe(b)]
-	b.foeEn -= fm.cost
-	push({ k = "say", who = "foe", text = b.foeName .. " used " .. fm.name .. "!" })
-	if fm.kind == "charge" then b.foeEn = math.min(Data.MaxEnergy, b.foeEn + fm.gain); push({ k = "fx", type = "charge", who = "foe" })
-	elseif fm.kind == "block" then push({ k = "fx", type = "block", who = "foe" })
-	elseif fm.kind == "attack" then
-		local mult = Data.multiplier(b.foeEl, b.myEl)
-		local dmg = math.floor(fm.power * mult)
-		b.myHp = math.max(0, b.myHp - dmg)
-		push({ k = "hit", who = "foe", dmg = dmg, mult = mult })
-	end
+	local foeId = chooseFoe(b)
+	b.foeEn -= Data.Moves[foeId].cost
+	act(b, "foe", foeId, false, push)
 	if b.myHp <= 0 then push({ k = "end", result = "lose", text = b.myName .. " fainted!" }); return evs, "lose" end
 	b.myEn = math.min(Data.MaxEnergy, b.myEn + Data.TurnEnergy)
 	b.foeEn = math.min(Data.MaxEnergy, b.foeEn + Data.TurnEnergy)

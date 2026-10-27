@@ -1,6 +1,7 @@
 # Battle feel plan (2026-10-27)
 
-Status: PLAN, not built. Waiting for Don's OK.
+Status: BUILT 2026-10-27 (Don's OK given the same day). Tested in Play; screenshots in docs/img/battle-feel/. Waiting for Don's feel check.
+Changes found while testing: placeholder orbs sit on the platform in the arena (they floated 7 studs up, so hits missed them); a gentle white screen flash instead of the pack's ScreenFlash (it washed the view out); the tame tint is light instead of dark red; orbs drop instead of tipping over (a ball looks the same tipped over).
 
 ## Goal
 Battles look and feel alive, using the effects pack already in the place (ReplicatedStorage.BattleFXPack). The server rules stay the same: same moves, damage, energy and taming.

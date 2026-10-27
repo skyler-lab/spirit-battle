@@ -736,7 +736,7 @@ function FX.CatchBox(fromModel: Model, target: Model): Part
 	local land = tc - Vector3.new(0, modelHeight(target) * 0.5 - 0.8, 0)
 	local box = buildBox()
 	box.CFrame = CFrame.new(a)
-	FX.ScreenTint(Color3.fromRGB(120, 0, 0), 1.7)
+	FX.ScreenTint(Color3.fromRGB(255, 205, 190), 1.7) -- light warm tint (was a dark red that hid the scene)
 	local mid = (a + land) * 0.5 + Vector3.new(0, 7, 0)
 	local start = os.clock()
 	while true do

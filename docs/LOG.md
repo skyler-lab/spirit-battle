@@ -2,6 +2,7 @@
 
 ## Decisions (approved / rejected)
 One line each, newest first. Dates are when Don decided; "reported 2026-10-24" means Don told Claude on that date and the decision date is not recorded.
+- 2026-10-27: battle feel plan (docs/BATTLE-FEEL-PLAN.md, steps 1 to 6) APPROVED to build. Reason: Don said "Yes, build steps 1 to 6".
 - 2026-10-27: this session takes over the battle look and feel using BattleFXPack, instead of waiting for the other chat, APPROVED. Reason: battles are still not good and the pack is already in the place.
 - 2026-10-27: battles after the faster pacing REJECTED as still "not good, we could do so much better". Reason: speed alone did not fix the feel.
 - 2026-10-24: background runs (including /morning) move to RobloxStudio\spirit-battle APPROVED. Reason: one working copy for all spirit battle work.
@@ -13,6 +14,14 @@ One line each, newest first. Dates are when Don decided; "reported 2026-10-24" m
 - 2026-10-23: home base is an island APPROVED (built with plain parts). Reason: Don's choice for the home base map.
 - 2026-10-23: Sell prompt on placed spirits KEPT. Reason: the economy is not designed yet.
 - 2026-10-23: storm turned OFF (disabled, not deleted). Reason: the pivot dropped it.
+
+## 2026-10-27: Battle feel pass (BattleFXPack)
+Request: build steps 1 to 6 of the battle feel plan, screenshots after each step.
+- BattleClient plays pack effects (switch USE_FX_PACK keeps the old path): intro, idle motion, Charge bolts, Strike lunge, Blast orb, Block bubble, hit feedback, big words, energy pops, win/tame/lose endings.
+- BattleServer sends events per spirit (blocks first, then you, then the wild spirit) with per-move times from BattleData.eventTime; arena orbs sit on their platform; new Studio-only hook TestEndHold.
+- Play test with real clicks: every move and ending seen; turns 2.6 to 3.0s; damage math unchanged; no script errors. Fixed in testing: floating orbs, white-out flash, dark tame tint, orb faint.
+- Files: BattleData, BattleServer, BattleClient, BattleFXPack.FX, docs, docs/img/battle-feel/. Test switches cleared.
+- Status: source committed; Studio check done; Don's approval waiting. Don to press Ctrl+S.
 
 ## 2026-10-27: Battle feel plan
 Request: take over the battle look and feel here using the effects pack in the place; plan first.

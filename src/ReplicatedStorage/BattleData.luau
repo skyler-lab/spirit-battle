@@ -40,8 +40,21 @@ D.ElementColor = {
 	Wind = Color3.fromRGB(190, 230, 255), Water = Color3.fromRGB(70, 150, 255),
 }
 
--- seconds each event type takes to play (server and client both use this so they stay in step)
-D.EventTime = { say = 0.55, fx = 0.45, hit = 0.6, blocked = 0.5, en = 0.2, reject = 0.4, ["end"] = 0.4, tame = 0.9 }
+-- seconds each event takes to play (server and client both use D.eventTime so they stay in step).
+-- Attacks and endings take their own time because each has its own animation (BattleFXPack effects).
+D.EventTime = { say = 0.45, fx = 0.45, hit = 0.6, blocked = 0.8, en = 0.2, reject = 0.4, ["end"] = 0.4, tame = 0.9 }
+D.FxTime = { charge = 0.9, block = 0.7 }
+D.HitTime = { Strike = 1.0, Blast = 1.5 }
+D.EndTime = { win = 2.4, lose = 1.8, tame = 1.2, run = 0.4 }
+D.TameTime = { ok = 4.4, fail = 4.0 }
+
+function D.eventTime(e)
+	if e.k == "fx" then return D.FxTime[e.type] or D.EventTime.fx end
+	if e.k == "hit" then return D.HitTime[e.move] or D.EventTime.hit end
+	if e.k == "end" then return D.EndTime[e.result] or D.EventTime["end"] end
+	if e.k == "tame" then return e.ok and D.TameTime.ok or D.TameTime.fail end
+	return D.EventTime[e.k] or 0.3
+end
 
 -- Taming (PLACEHOLDERS). TAME only works when the wild spirit's health is at or below Threshold (fraction of max).
 -- Chance scales linearly from ChanceAtThreshold (at exactly Threshold) up to ChanceAtZero (as health nears 0).

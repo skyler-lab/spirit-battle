@@ -1,4 +1,4 @@
--- BattleClient: plain placeholder battle UI + camera + simple effects. Real art comes later; the flow is what is being tested.
+-- BattleClient: plain placeholder battle UI + camera. Battle effects come from ReplicatedStorage.BattleFXPack (USE_FX_PACK below).
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
 local TS = game:GetService("TweenService")
@@ -198,40 +198,420 @@ local function hideOtherGuis(on)
 	end
 end
 
+-- ===== BattleFXPack presentation (2026-10-27). Set USE_FX_PACK = false to go back to the old plain effects above. =====
+local USE_FX_PACK = true
+local RunService = game:GetService("RunService")
+local Pack = RS:WaitForChild("BattleFXPack")
+local FX = require(Pack:WaitForChild("FX"))
+local PackMoves = require(Pack:WaitForChild("Moves"))
+local Rig = require(RS:WaitForChild("SpiritRig"))
+
+local motion = {} -- "me" / "foe" -> { model, home, off, rig, frozen, seed }
+local camBase, camPunch, camShake = nil, 0, 0
+local loopConn = nil
+local catchBox = nil
+
+local function center(m) return (m:GetBoundingBox()).Position end
+
+-- move a spirit's action offset (lunge, jolt) over t seconds; idle motion keeps playing on top
+local function lerpOff(mo, to, t)
+	local from = mo.off
+	local t0 = os.clock()
+	while true do
+		local f = math.clamp((os.clock() - t0) / t, 0, 1)
+		mo.off = from:Lerp(to, f)
+		if f >= 1 then break end
+		RunService.RenderStepped:Wait()
+	end
+end
+
+local function camTo(cf, t)
+	local from = camBase or cam.CFrame
+	local t0 = os.clock()
+	while true do
+		local f = math.clamp((os.clock() - t0) / t, 0, 1)
+		camBase = from:Lerp(cf, 1 - (1 - f) ^ 2)
+		if f >= 1 then break end
+		RunService.RenderStepped:Wait()
+	end
+end
+
+local function punch(studs, t, shake)
+	task.spawn(function()
+		local t0 = os.clock()
+		while true do
+			local f = math.clamp((os.clock() - t0) / t, 0, 1)
+			camPunch = studs * math.sin(f * math.pi)
+			camShake = (shake or 0) * (1 - f)
+			if f >= 1 then break end
+			RunService.RenderStepped:Wait()
+		end
+		camPunch, camShake = 0, 0
+	end)
+end
+
+local function startMotion()
+	motion = {}
+	for _, who in ipairs({ "me", "foe" }) do
+		local m = stageModel(who)
+		if m then
+			local ok, r = pcall(Rig.new, m)
+			motion[who] = { model = m, home = m:GetPivot(), off = CFrame.new(), rig = ok and r or nil, frozen = false, seed = math.random() * 10 }
+		end
+	end
+	if loopConn then loopConn:Disconnect() end
+	local t0 = os.clock()
+	loopConn = RunService.RenderStepped:Connect(function(dt)
+		local t = os.clock() - t0
+		for _, mo in pairs(motion) do
+			if not mo.frozen and mo.model.Parent then
+				-- idle: gentle bob and sway on top of any action offset
+				local idle = CFrame.new(0, math.sin(t * 2.4 + mo.seed) * 0.18, 0) * CFrame.Angles(0, math.sin(t * 1.3 + mo.seed) * 0.05, 0)
+				local cf = mo.home * mo.off * idle
+				if mo.rig then mo.rig:Update(cf, 0, t, dt, 1) else mo.model:PivotTo(cf) end
+			end
+		end
+		if camBase then
+			local drift = CFrame.new(math.sin(t * 0.5) * 0.35, math.sin(t * 0.37) * 0.2, 0)
+			local shake = CFrame.new()
+			if camShake > 0 then shake = CFrame.new((math.random() - 0.5) * camShake, (math.random() - 0.5) * camShake, 0) end
+			cam.CFrame = camBase * drift * CFrame.new(0, 0, -camPunch) * shake
+		end
+	end)
+end
+
+local function stopMotion()
+	if loopConn then loopConn:Disconnect(); loopConn = nil end
+	motion = {}
+	camBase, camPunch, camShake = nil, 0, 0
+	catchBox = nil
+end
+
+-- big centre-screen word ("SUPER EFFECTIVE!", "BLOCKED!")
+local popLbl = text(hud, "", UDim2.fromOffset(700, 70), UDim2.fromScale(0.5, 0.15), 46, Color3.new(1, 1, 1), Enum.TextXAlignment.Center)
+popLbl.AnchorPoint = Vector2.new(0.5, 0.5); popLbl.Font = Enum.Font.GothamBlack; popLbl.TextStrokeTransparency = 0; popLbl.TextTransparency = 1
+local popScale = Instance.new("UIScale"); popScale.Parent = popLbl
+local popId = 0
+local function pop(str, color)
+	popId += 1
+	local id = popId
+	popLbl.Text = str; popLbl.TextColor3 = color; popLbl.TextTransparency = 0; popLbl.TextStrokeTransparency = 0
+	popScale.Scale = 1.7
+	TS:Create(popScale, TweenInfo.new(0.22, Enum.EasingStyle.Back), { Scale = 1 }):Play()
+	task.delay(0.75, function()
+		if popId == id then TS:Create(popLbl, TweenInfo.new(0.3), { TextTransparency = 1, TextStrokeTransparency = 1 }):Play() end
+	end)
+end
+
+-- "+2" / "-5" energy pops just left of a panel's energy text
+local function enPop(who, str, color)
+	local p = (who == "me") and meP or foeP
+	local l = text(p.en.Parent, str, UDim2.fromOffset(50, 24), UDim2.new(1, -150, 0, 38), 22, color or Color3.fromRGB(255, 200, 0), Enum.TextXAlignment.Right)
+	l.TextStrokeTransparency = 0.2
+	TS:Create(l, TweenInfo.new(0.9), { Position = l.Position - UDim2.fromOffset(0, 30), TextTransparency = 1, TextStrokeTransparency = 1 }):Play()
+	Debris:AddItem(l, 0.95)
+end
+
+-- quick white flash over the screen for big hits (gentler than the pack's ScreenFlash, which washed the view out)
+local flashFrame = frame(gui, "HitFlash", UDim2.fromScale(1, 1), UDim2.fromScale(0, 0), Color3.new(1, 1, 1))
+flashFrame.BackgroundTransparency = 1; flashFrame.ZIndex = 40
+local function screenFlash()
+	flashFrame.BackgroundTransparency = 0.6
+	TS:Create(flashFrame, TweenInfo.new(0.3), { BackgroundTransparency = 1 }):Play()
+end
+
+-- flash ball plus rays in the attacker's element colour
+local function burstAt(pos, color, scale)
+	local flash = tmp(Vector3.new(2, 2, 2) * scale, color, CFrame.new(pos), Enum.PartType.Ball, 0)
+	TS:Create(flash, TweenInfo.new(0.35), { Size = Vector3.new(9, 9, 9) * scale, Transparency = 1 }):Play()
+	local face = CFrame.lookAt(pos, cam.CFrame.Position)
+	for i = 1, 10 do
+		local ang = (i / 10) * math.pi * 2
+		local len = (3 + math.random() * 3) * scale
+		local r = tmp(Vector3.new(0.45 * scale, len, 0.3 * scale), (i % 2 == 0) and color or Color3.new(1, 1, 1), face * CFrame.Angles(0, 0, ang) * CFrame.new(0, len / 2, 0))
+		TS:Create(r, TweenInfo.new(0.45, Enum.EasingStyle.Quart), { Size = Vector3.new(0.05, len * 1.6, 0.05), Transparency = 1,
+			CFrame = face * CFrame.Angles(0, 0, ang) * CFrame.new(0, len * 1.1, 0) }):Play()
+	end
+end
+
+local function hitFx(def, color, dmg, mult, power)
+	local d = motion[def]
+	if not d then return end
+	FX.HitFlash(d.model, 0.2)
+	burstAt(center(d.model), color, power)
+	FX.DamageNumber(d.model, dmg, (mult > 1) and Color3.fromRGB(255, 200, 0) or ((mult < 1) and Color3.fromRGB(205, 205, 205) or nil))
+	punch(1.5 * power, 0.35, (mult > 1) and 0.7 or 0.25 * power)
+	if mult > 1 then pop("SUPER EFFECTIVE!", Color3.fromRGB(255, 205, 40)) elseif mult < 1 then pop("not very effective", Color3.fromRGB(210, 210, 210)) end
+	task.spawn(function()
+		lerpOff(d, CFrame.new(0, 0.3, 1.8 * power), 0.07)
+		lerpOff(d, CFrame.new(), 0.3)
+	end)
+end
+
+local function shieldUp(who)
+	local mo = motion[who]
+	if mo then task.spawn(PackMoves.Shield.play, { attacker = mo.model, target = mo.model }) end
+end
+
+local function shieldHit(who)
+	local mo = motion[who]
+	if not mo then return end
+	local c = center(mo.model)
+	burstAt(c, Color3.fromRGB(80, 220, 255), 1)
+	FX.Puff(c, 1)
+	PackMoves.ShieldBreak(mo.model)
+	pop("BLOCKED!", Color3.fromRGB(120, 220, 255))
+	punch(0.8, 0.3, 0.2)
+end
+
+local function chargeFx(who)
+	local mo = motion[who]
+	if not mo then return end
+	local h = FX.Charge(mo.model, 0)
+	h:Add(3)
+	FX.Sparkle(center(mo.model), 30)
+	enPop(who, "+" .. Data.Moves.Charge.gain)
+	task.delay(0.55, function() h:Consume(); h:Destroy() end)
+end
+
+-- Strike: wind up, lunge most of the way, slash marks in the element colour, spring back
+local function strike(att, def, color, dmg, mult, blocked)
+	local a, d = motion[att], motion[def]
+	if not a or not d then return end
+	local gap = (d.home.Position - a.home.Position).Magnitude
+	lerpOff(a, CFrame.new(0, 0, 0.9), 0.12)
+	lerpOff(a, CFrame.new(0, 0.5, -gap * 0.55), 0.14)
+	local hitPos = center(d.model)
+	if blocked then shieldHit(def) else hitFx(def, color, dmg, mult, 1) end
+	local face = CFrame.lookAt(hitPos, cam.CFrame.Position)
+	for i = -1, 1 do
+		local s = tmp(Vector3.new(0.4, 6, 0.4), (i == 0) and Color3.new(1, 1, 1) or color, face * CFrame.Angles(0, 0, math.rad(35 * i + 20)))
+		TS:Create(s, TweenInfo.new(0.3), { Transparency = 1, Size = Vector3.new(0.05, 8, 0.05) }):Play()
+	end
+	task.wait(0.2)
+	lerpOff(a, CFrame.new(), 0.25)
+end
+
+-- Blast: an orb grows in the element colour, arcs over and explodes with a flash
+local function blast(att, def, color, dmg, mult, blocked)
+	local a, d = motion[att], motion[def]
+	if not a or not d then return end
+	local from = center(a.model) + Vector3.new(0, 1.5, 0)
+	local orb = tmp(Vector3.new(0.5, 0.5, 0.5), color, CFrame.new(from), Enum.PartType.Ball)
+	TS:Create(orb, TweenInfo.new(0.3, Enum.EasingStyle.Back), { Size = Vector3.new(2.8, 2.8, 2.8) }):Play()
+	lerpOff(a, CFrame.new(0, 0, 0.8), 0.3)
+	task.spawn(function() lerpOff(a, CFrame.new(0, 0, -1.4), 0.08); lerpOff(a, CFrame.new(), 0.25) end)
+	local to = center(d.model)
+	local mid = (from + to) * 0.5 + Vector3.new(0, 7, 0)
+	local t0 = os.clock()
+	while true do
+		local f = math.clamp((os.clock() - t0) / 0.5, 0, 1)
+		orb.Position = (1 - f) ^ 2 * from + 2 * (1 - f) * f * mid + f ^ 2 * to
+		if math.random() < 0.6 then
+			local tr = tmp(Vector3.new(1.2, 1.2, 1.2), color, CFrame.new(orb.Position), Enum.PartType.Ball, 0.3)
+			TS:Create(tr, TweenInfo.new(0.3), { Size = Vector3.new(0.1, 0.1, 0.1), Transparency = 1 }):Play()
+		end
+		if f >= 1 then break end
+		RunService.RenderStepped:Wait()
+	end
+	orb:Destroy()
+	if blocked then shieldHit(def) else
+		screenFlash()
+		hitFx(def, color, dmg, mult, 1.6)
+		FX.SparkleRain(to, 0.8)
+	end
+	task.wait(0.35)
+end
+
+-- knocked out: tip over; a defeated wild spirit then rises, fades and bursts into sparkles
+local function faintFx(who, vanish)
+	local mo = motion[who]
+	if not mo then return end
+	mo.frozen = true
+	FX.HitFlash(mo.model, 0.3)
+	if mo.model:FindFirstChild("Orb") then
+		-- a ball looks the same tipped over, so a placeholder orb drops onto its platform instead
+		local cf = mo.model:GetPivot()
+		local t0 = os.clock()
+		while os.clock() - t0 < 0.3 do
+			local f = (os.clock() - t0) / 0.3
+			mo.model:PivotTo(cf - Vector3.new(0, 1.2 * f * f, 0))
+			RunService.RenderStepped:Wait()
+		end
+		FX.Puff(mo.model:GetPivot().Position - Vector3.new(0, 1.5, 0), 1)
+	else
+		FX.Faint(mo.model)
+	end
+	if not vanish then return end
+	task.wait(0.35)
+	local c = center(mo.model)
+	local startCF = mo.model:GetPivot()
+	for _, p in ipairs(mo.model:GetDescendants()) do
+		if p:IsA("BasePart") and p.Transparency < 1 then TS:Create(p, TweenInfo.new(0.7), { Transparency = 1 }):Play() end
+	end
+	local t0 = os.clock()
+	while os.clock() - t0 < 0.7 do
+		mo.model:PivotTo(startCF + Vector3.new(0, 3 * (os.clock() - t0) / 0.7, 0))
+		RunService.RenderStepped:Wait()
+	end
+	FX.Puff(c, 1.5)
+	FX.Sparkle(c, 90)
+	burstAt(c, Color3.fromRGB(255, 230, 120), 1.2)
+end
+
+-- tame try: box flies over, the spirit goes in, two wobbles, then it holds or breaks open
+local function tameFx(ok)
+	local me, foe = motion.me, motion.foe
+	if not me or not foe then return end
+	local saved = {}
+	for _, p in ipairs(foe.model:GetDescendants()) do if p:IsA("BasePart") then saved[p] = p.Transparency end end
+	foe.frozen = true
+	local box = FX.CatchBox(me.model, foe.model)
+	catchBox = box
+	local base = box.CFrame
+	for _ = 1, 2 do
+		for _, ang in ipairs({ -15, 15, -10, 10, 0 }) do
+			TS:Create(box, TweenInfo.new(0.12, Enum.EasingStyle.Sine), { CFrame = base * CFrame.Angles(0, 0, math.rad(ang)) }):Play()
+			task.wait(0.12)
+		end
+		task.wait(0.35)
+	end
+	if ok then
+		FX.StarBurst(box.Position + Vector3.new(0, 1, 0))
+		FX.Sparkle(box.Position, 60)
+		pop("TAMED!", Color3.fromRGB(120, 255, 140))
+	else
+		FX.Puff(box.Position, 1.2)
+		box:Destroy(); catchBox = nil
+		for p, tr in pairs(saved) do if p.Parent then p.Transparency = tr end end
+		foe.frozen = false
+		pop("IT BROKE FREE!", Color3.fromRGB(255, 120, 90))
+	end
+end
+
+-- battle start: camera circles the wild spirit, then your spirit drops in and the camera pulls back to the main view
+local function introFx(foeName)
+	local me, foe = motion.me, motion.foe
+	if not me or not foe then return end
+	local mainCF = cam.CFrame
+	local fpos = center(foe.model)
+	local dir = ((fpos - center(me.model)) * Vector3.new(1, 0, 1)).Unit
+	me.frozen = true
+	local saved = {}
+	for _, p in ipairs(me.model:GetDescendants()) do if p:IsA("BasePart") then saved[p] = p.Transparency; p.Transparency = 1 end end
+	local function orbit(f)
+		local pos = fpos + CFrame.Angles(0, math.rad(-30 + 40 * f), 0):VectorToWorldSpace(-dir * 16) + Vector3.new(0, 3, 0)
+		return CFrame.lookAt(pos, fpos + Vector3.new(0, 0.5, 0))
+	end
+	camBase = orbit(0)
+	tweenFade(1, 0.25)
+	addMsg("A wild " .. foeName .. " has appeared!", "foe")
+	FX.Sparkle(fpos, 40)
+	task.spawn(function() lerpOff(foe, CFrame.new(0, 1.6, 0), 0.12); lerpOff(foe, CFrame.new(), 0.2) end)
+	local t0 = os.clock()
+	while os.clock() - t0 < 1.0 do
+		camBase = orbit((os.clock() - t0) / 1.0)
+		RunService.RenderStepped:Wait()
+	end
+	task.spawn(camTo, mainCF, 0.45)
+	-- your spirit drops in from above
+	local land = me.home
+	for p, tr in pairs(saved) do if p.Parent then p.Transparency = tr end end
+	t0 = os.clock()
+	while true do
+		local f = math.clamp((os.clock() - t0) / 0.35, 0, 1)
+		me.model:PivotTo(land + Vector3.new(0, 8 * (1 - f * f), 0))
+		if f >= 1 then break end
+		RunService.RenderStepped:Wait()
+	end
+	me.frozen = false
+	FX.Puff(land.Position - Vector3.new(0, 2, 0), 1.2)
+	FX.Sparkle(center(me.model), 40)
+	punch(0.8, 0.25, 0.3)
+	task.wait(0.3)
+end
+
+local function playEventFx(e)
+	local who = e.who
+	if e.k == "say" then
+		addMsg(e.text, who)
+		local mv = e.move and Data.Moves[e.move]
+		if mv and mv.cost > 0 then enPop(who, "-" .. mv.cost, Color3.fromRGB(255, 120, 80)) end
+	elseif e.k == "reject" then
+		if e.why == "tame" then addMsg("Too strong to tame!") else addMsg("Not enough energy!") end
+	elseif e.k == "fx" then
+		if e.type == "charge" then chargeFx(who) else shieldUp(who) end
+	elseif e.k == "hit" or e.k == "blocked" then
+		local att = (e.k == "hit") and who or e.by
+		local def = (att == "me") and "foe" or "me"
+		local el = (att == "me") and state.myEl or state.foeEl
+		local fn = (e.move == "Blast") and blast or strike
+		task.spawn(fn, att, def, Data.ElementColor[el] or Color3.new(1, 1, 1), e.dmg, e.mult or 1, e.k == "blocked")
+		if e.k == "hit" then
+			if e.mult > 1 then addMsg("It's super effective!") elseif e.mult < 1 then addMsg("Not very effective...") end
+		end
+	elseif e.k == "tame" then
+		task.spawn(tameFx, e.ok)
+	elseif e.k == "en" then
+		if motion.me then PackMoves.ShieldBreak(motion.me.model) end
+		if motion.foe then PackMoves.ShieldBreak(motion.foe.model) end
+		enPop("me", "+" .. Data.TurnEnergy); enPop("foe", "+" .. Data.TurnEnergy)
+	elseif e.k == "end" then
+		if e.text then addMsg(e.text) end
+		if motion.me then PackMoves.ShieldBreak(motion.me.model) end
+		if motion.foe then PackMoves.ShieldBreak(motion.foe.model) end
+		if e.result == "win" then task.spawn(faintFx, "foe", true)
+		elseif e.result == "lose" then task.spawn(faintFx, "me", false)
+		elseif e.result == "tame" and catchBox then FX.Sparkle(catchBox.Position, 40) end
+	end
+end
+
+-- old plain effects (USE_FX_PACK = false)
+local function playEventOld(e)
+	if e.k == "say" then addMsg(e.text, e.who)
+	elseif e.k == "reject" then
+		if e.why == "tame" then addMsg("Too strong to tame!") else addMsg("Not enough energy!") end
+	elseif e.k == "tame" then
+		local m = stageModel("foe")
+		if m then
+			local ring = tmp(Vector3.new(7, 7, 7), Color3.fromRGB(80, 220, 120), m:GetPivot(), Enum.PartType.Ball, 0.4)
+			TS:Create(ring, TweenInfo.new(1.1), { Size = Vector3.new(1, 1, 1), Transparency = 1 }):Play()
+		end
+		addMsg(e.ok and "Success!" or ("Failed... (" .. math.floor((e.chance or 0) * 100 + 0.5) .. "% chance)"))
+	elseif e.k == "fx" then
+		local m = stageModel(e.who)
+		if m then if e.type == "charge" then fxCharge(m) else fxBlock(m) end end
+	elseif e.k == "blocked" then
+		addMsg("Blocked!")
+	elseif e.k == "hit" then
+		local att, def = stageModel(e.who), stageModel(e.who == "me" and "foe" or "me")
+		local el = (e.who == "me") and state.myEl or state.foeEl
+		if att and def then
+			fxHit(att, def, Data.ElementColor[el] or Color3.new(1, 1, 1))
+			task.delay(0.45, function() dmgText(def, "-" .. e.dmg, Color3.fromRGB(255, 70, 60)) end)
+		end
+		if e.mult > 1 then addMsg("It's super effective!") elseif e.mult < 1 then addMsg("Not very effective...") end
+	elseif e.k == "end" then
+		if e.text then addMsg(e.text) end
+	end
+end
+
+-- health bars drop when the hit lands, not when the move starts
+local IMPACT = { Strike = 0.26, Blast = 0.85 }
+
 local playing = false
 local function playEvents(evs)
 	playing = true
 	local ended = false
 	for _, e in ipairs(evs) do
-		applySnap(e.s)
-		if e.k == "say" then addMsg(e.text, e.who)
-		elseif e.k == "reject" then
-			if e.why == "tame" then addMsg("Too strong to tame!") else addMsg("Not enough energy!") end
-		elseif e.k == "tame" then
-			local m = stageModel("foe")
-			if m then
-				local ring = tmp(Vector3.new(7, 7, 7), Color3.fromRGB(80, 220, 120), m:GetPivot(), Enum.PartType.Ball, 0.4)
-				TS:Create(ring, TweenInfo.new(1.1), { Size = Vector3.new(1, 1, 1), Transparency = 1 }):Play()
-			end
-			addMsg(e.ok and "Success!" or ("Failed... (" .. math.floor((e.chance or 0) * 100 + 0.5) .. "% chance)"))
-		elseif e.k == "fx" then
-			local m = stageModel(e.who)
-			if m then if e.type == "charge" then fxCharge(m) else fxBlock(m) end end
-		elseif e.k == "blocked" then
-			addMsg("Blocked!")
-		elseif e.k == "hit" then
-			local att, def = stageModel(e.who), stageModel(e.who == "me" and "foe" or "me")
-			local el = (e.who == "me") and state.myEl or state.foeEl
-			if att and def then
-				fxHit(att, def, Data.ElementColor[el] or Color3.new(1, 1, 1))
-				task.delay(0.45, function() dmgText(def, "-" .. e.dmg, Color3.fromRGB(255, 70, 60)) end)
-			end
-			if e.mult > 1 then addMsg("It's super effective!") elseif e.mult < 1 then addMsg("Not very effective...") end
-		elseif e.k == "end" then
-			ended = true
-			if e.text then addMsg(e.text) end
+		if USE_FX_PACK and e.k == "hit" then
+			task.delay(IMPACT[e.move] or 0, applySnap, e.s)
+		else
+			applySnap(e.s)
 		end
-		task.wait(Data.EventTime[e.k] or 0.3)
+		if e.k == "end" then ended = true end
+		if USE_FX_PACK then playEventFx(e) else playEventOld(e) end
+		task.wait(Data.eventTime(e))
 	end
 	playing = false
 	if not ended then canAct = true; showPage("main"); refreshMoves() end
@@ -254,9 +634,14 @@ EvStart.OnClientEvent:Connect(function(info)
 	hud.Visible = true
 	hideOtherGuis(true)
 	applySnap(info.s)
-	tweenFade(1, 0.3)
-	addMsg("A wild " .. info.foeName .. " has appeared!", "foe")
-	task.wait(1.2)
+	if USE_FX_PACK then
+		startMotion()
+		introFx(info.foeName)
+	else
+		tweenFade(1, 0.3)
+		addMsg("A wild " .. info.foeName .. " has appeared!", "foe")
+		task.wait(1.2)
+	end
 	canAct = true; showPage("main"); refreshMoves()
 end)
 
@@ -269,6 +654,11 @@ EvEnd.OnClientEvent:Connect(function(result)
 	hud.Visible = false
 	hideOtherGuis(false)
 	for _, c in ipairs(msgHolder:GetChildren()) do if c:IsA("Frame") then c:Destroy() end end
+	if USE_FX_PACK then
+		stopMotion()
+		FX.Cleanup()
+		popLbl.TextTransparency = 1; popLbl.TextStrokeTransparency = 1
+	end
 	cam.CameraType = Enum.CameraType.Custom
 	cam.FieldOfView = normalFov
 	local hum = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
