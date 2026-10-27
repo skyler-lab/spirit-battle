@@ -2,6 +2,7 @@
 
 ## Decisions (approved / rejected)
 One line each, newest first. Dates are when Don decided; "reported 2026-10-24" means Don told Claude on that date and the decision date is not recorded.
+- 2026-10-27: battles after the battle feel pass REJECTED: "it still sucks". Reason: not given yet; asked Don what sucks most.
 - 2026-10-27: battle feel plan (docs/BATTLE-FEEL-PLAN.md, steps 1 to 6) APPROVED to build. Reason: Don said "Yes, build steps 1 to 6".
 - 2026-10-27: this session takes over the battle look and feel using BattleFXPack, instead of waiting for the other chat, APPROVED. Reason: battles are still not good and the pack is already in the place.
 - 2026-10-27: battles after the faster pacing REJECTED as still "not good, we could do so much better". Reason: speed alone did not fix the feel.

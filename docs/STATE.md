@@ -91,7 +91,7 @@ Place contents (Studio, 2026-10-23, after the home island): Workspace has Basepl
 
 ## Open tasks (priority order)
 1. Ask Don what to do with the EV_ parts in Workspace. Placeholder orbs look odd (neon, floating); fine until real models exist.
-2. Battle feel (Don's playtest: slow and boring). Battle feel pass BUILT 2026-10-27 (docs/BATTLE-FEEL-PLAN.md steps 1 to 6), waiting for Don's feel check. Next halves of "battles are not good": different abilities per spirit (game design), rewards after a win (needs economy), sound (needs uploads, Don's OK), real menu and models (UI/art last).
+2. Battle feel (Don's playtest: slow and boring). Battle feel pass BUILT 2026-10-27 (docs/BATTLE-FEEL-PLAN.md steps 1 to 6). Don's verdict the same day: "it still sucks" (reason not given yet). Next halves of "battles are not good": different abilities per spirit (game design), rewards after a win (needs economy), sound (needs uploads, Don's OK), real menu and models (UI/art last).
 3. Pick which owned spirit fights (BattleSpirit is still always Wood) and a real team/inventory UI.
 4. Home island: decide on the blank sign boards. Then plan what "home customizing" means and the art list in docs/HOME-BASE-PLAN.md.
 5. Remove or retire the storm-era scripts and the old HUD once nothing depends on them. Do not delete without Don's OK.
