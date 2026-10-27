@@ -2,6 +2,7 @@
 
 ## Decisions (approved / rejected)
 One line each, newest first. Dates are when Don decided; "reported 2026-10-24" means Don told Claude on that date and the decision date is not recorded.
+- 2026-10-27: follow the reference recordings for the fight (take example, not copy) instead of the written redesign plan APPROVED. Reason: Don said he had already shown how he wants it in the video.
 - 2026-10-27: fighting redesign before models APPROVED. Reason: Don said "Yes. Plan a redesign of the fighting first".
 - 2026-10-27: battles after the battle feel pass REJECTED: "it still sucks". Reason (Don): looks ugly, no models, boring to play, too slow, "the fighting sucks".
 - 2026-10-27: battle feel plan (docs/BATTLE-FEEL-PLAN.md, steps 1 to 6) APPROVED to build. Reason: Don said "Yes, build steps 1 to 6".
@@ -16,6 +17,14 @@ One line each, newest first. Dates are when Don decided; "reported 2026-10-24" m
 - 2026-10-23: home base is an island APPROVED (built with plain parts). Reason: Don's choice for the home base map.
 - 2026-10-23: Sell prompt on placed spirits KEPT. Reason: the economy is not designed yet.
 - 2026-10-23: storm turned OFF (disabled, not deleted). Reason: the pivot dropped it.
+
+## 2026-10-27: Own abilities and reference-style fight
+Request: take example from Don's 4 recordings: the fighting, each ability, the screen and ability effects (not a copy).
+- Studied the recordings (notes in docs/REFERENCE-FIGHT-NOTES.md). Each spirit now has Charge plus 3 own abilities and its own health; the wild spirit uses its own moves; heal and per-move block added.
+- New camera shots and cuts, energy as orbiting bolts, new BattleMoveFX module with big element effects (lunge, shot, burst, heal).
+- Studio was closed and Place1 on disk was the 10-23 save; reopened it and loaded all scripts from src. Play test with real clicks: moves, cuts, heal, win, damage math OK; turns 2.7 to 3.1s; no errors.
+- Files: BattleData, BattleServer, BattleClient, BattleFXPack.FX, BattleMoveFX (new), docs. Test switches cleared.
+- Status: source committed; Studio check done; Don's approval waiting. Don MUST press Ctrl+S (nothing since 10-23 is saved in the place).
 
 ## 2026-10-27: Fight redesign plan
 Request: plan a redesign of the fighting (own abilities per spirit, real choices, faster turns); plan only.

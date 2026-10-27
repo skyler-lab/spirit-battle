@@ -61,17 +61,25 @@ for _, spot in ipairs(area:GetChildren()) do
 end
 
 -- ===== battle =====
+-- the wild spirit picks from its own moves: charges when low on energy, likes its big attack, heals when hurt
 local function chooseFoe(b)
-	local opts = { "Charge" }
-	if b.foeEn >= 2 then table.insert(opts, "Strike"); table.insert(opts, "Strike") end
-	if b.foeEn >= 5 then table.insert(opts, "Blast"); table.insert(opts, "Blast") end
-	if b.foeEn >= 1 then table.insert(opts, "Block") end
-	if b.foeEn < 2 then table.insert(opts, "Charge") end
+	local opts = {}
+	local function add(id, n) for _ = 1, n do table.insert(opts, id) end end
+	add("Charge", (b.foeEn < 2) and 3 or 1)
+	for _, id in ipairs(Data.Spirits[b.foeName].moves) do
+		local m = Data.Moves[id]
+		if b.foeEn >= m.cost then
+			if m.kind == "attack" then add(id, (m.cost >= 5) and 3 or 2)
+			elseif m.kind == "heal" and b.foeHp < b.foeMax * 0.5 then add(id, 3)
+			elseif m.kind == "block" then add(id, 1) end
+		end
+	end
 	return opts[math.random(#opts)]
 end
 
--- one spirit's move as events: its "used X!" line, then its effect. Blocks were already decided for both sides.
-local function act(b, side, id, targetBlocks, push)
+-- one spirit's move as events: its "used X!" line, then its effect. Blocks were already decided for both sides:
+-- targetBlockCost is the cost of the other side's block move, or nil when it is not blocking.
+local function act(b, side, id, targetBlockCost, push)
 	local m = Data.Moves[id]
 	local isMe = side == "me"
 	local other = isMe and "foe" or "me"
@@ -80,12 +88,15 @@ local function act(b, side, id, targetBlocks, push)
 		if isMe then b.myEn = math.min(Data.MaxEnergy, b.myEn + m.gain) else b.foeEn = math.min(Data.MaxEnergy, b.foeEn + m.gain) end
 		push({ k = "fx", type = "charge", who = side })
 	elseif m.kind == "block" then
-		push({ k = "fx", type = "block", who = side })
+		push({ k = "fx", type = "block", who = side, move = id })
+	elseif m.kind == "heal" then
+		local before = isMe and b.myHp or b.foeHp
+		if isMe then b.myHp = math.min(b.myMax, b.myHp + m.heal) else b.foeHp = math.min(b.foeMax, b.foeHp + m.heal) end
+		push({ k = "heal", who = side, amt = (isMe and b.myHp or b.foeHp) - before, move = id })
 	elseif m.kind == "attack" then
-		if targetBlocks then
+		if targetBlockCost then
 			-- a block that stops an attack refunds its own cost
-			local blockCost = Data.Moves.Block.cost
-			if isMe then b.foeEn = math.min(Data.MaxEnergy, b.foeEn + blockCost) else b.myEn = math.min(Data.MaxEnergy, b.myEn + blockCost) end
+			if isMe then b.foeEn = math.min(Data.MaxEnergy, b.foeEn + targetBlockCost) else b.myEn = math.min(Data.MaxEnergy, b.myEn + targetBlockCost) end
 			push({ k = "blocked", who = other, by = side, move = id })
 		else
 			local mult = isMe and Data.multiplier(b.myEl, b.foeEl) or Data.multiplier(b.foeEl, b.myEl)
@@ -110,8 +121,8 @@ local function resolve(b, myId)
 	if not myBlocks then table.insert(order, "me") end
 	if not foeBlocks then table.insert(order, "foe") end
 	for _, side in ipairs(order) do
-		if side == "me" and b.myHp > 0 then act(b, "me", myId, foeBlocks, push)
-		elseif side == "foe" and b.foeHp > 0 then act(b, "foe", foeId, myBlocks, push) end
+		if side == "me" and b.myHp > 0 then act(b, "me", myId, foeBlocks and fm.cost or nil, push)
+		elseif side == "foe" and b.foeHp > 0 then act(b, "foe", foeId, myBlocks and mm.cost or nil, push) end
 	end
 	if b.foeHp <= 0 then push({ k = "end", result = "win", text = b.foeName .. " was defeated!" }); return evs, "win" end
 	if b.myHp <= 0 then push({ k = "end", result = "lose", text = b.myName .. " fainted!" }); return evs, "lose" end
@@ -210,7 +221,7 @@ local function startBattle(player, w)
 	b.starting = false
 	EvStart:FireClient(player, {
 		stage = b.stage.Name, pos = b.stage:GetAttribute("Pos"), myName = myName, foeName = foeName, myEl = b.myEl, foeEl = b.foeEl,
-		myMax = b.myMax, foeMax = b.foeMax, s = snap(b),
+		myMax = b.myMax, foeMax = b.foeMax, s = snap(b), myMoves = Data.movesFor(myName),
 	})
 	task.delay(1.6, function() if battles[player] == b then b.ready = true end end)
 end
@@ -258,7 +269,7 @@ local function tameTurn(player, b)
 	-- the wild spirit's move (the player made no move, so nothing of theirs blocks)
 	local foeId = chooseFoe(b)
 	b.foeEn -= Data.Moves[foeId].cost
-	act(b, "foe", foeId, false, push)
+	act(b, "foe", foeId, nil, push)
 	if b.myHp <= 0 then push({ k = "end", result = "lose", text = b.myName .. " fainted!" }); return evs, "lose" end
 	b.myEn = math.min(Data.MaxEnergy, b.myEn + Data.TurnEnergy)
 	b.foeEn = math.min(Data.MaxEnergy, b.foeEn + Data.TurnEnergy)
@@ -287,7 +298,7 @@ EvMove.OnServerEvent:Connect(function(player, id)
 		return
 	end
 	local mv = Data.Moves[id]
-	if not mv then return end
+	if not mv or not Data.canUse(b.myName, id) then return end
 	if b.myEn < mv.cost then EvEvents:FireClient(player, { { k = "reject", s = snap(b) } }); return end
 	b.busy = true
 	local evs, result = resolve(b, id)

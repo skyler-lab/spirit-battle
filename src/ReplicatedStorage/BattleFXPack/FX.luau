@@ -7,6 +7,7 @@ local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 
 local FX = {}
+FX.BoltScale = 1 -- size of the charge bolts; the game's battle client sets it smaller (2026-10-27)
 
 local function folder(): Folder
 	local f = Workspace:FindFirstChild("BattleFX")
@@ -136,8 +137,9 @@ function FX.Charge(model: Model, count: number)
 		b:ScaleTo(0.05)
 		table.insert(bolts, b)
 		task.spawn(function()
-			for k = 1, 6 do b:ScaleTo(0.05 + (1.2 - 0.05) * k / 6); task.wait(0.025) end
-			for k = 1, 4 do b:ScaleTo(1.2 - 0.2 * k / 4); task.wait(0.025) end
+			local S = FX.BoltScale
+			for k = 1, 6 do b:ScaleTo(0.05 + (S * 1.2 - 0.05) * k / 6); task.wait(0.025) end
+			for k = 1, 4 do b:ScaleTo(S * (1.2 - 0.2 * k / 4)); task.wait(0.025) end
 		end)
 	end
 
@@ -170,7 +172,7 @@ function FX.Charge(model: Model, count: number)
 				local start = b:GetPivot()
 				for k = 1, 9 do
 					b:PivotTo(start * CFrame.new(0, k * 0.9, 0) * CFrame.Angles(0, 0, k * 0.3))
-					b:ScaleTo(math.max(0.05, 1 - k / 9))
+					b:ScaleTo(math.max(0.05, FX.BoltScale * (1 - k / 9)))
 					task.wait(1 / 30)
 				end
 				b:Destroy()

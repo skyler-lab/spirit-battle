@@ -1,4 +1,4 @@
--- BattleData: the one battle rule set. Every battle uses these numbers; only spirits and their elements differ.
+-- BattleData: the one battle rule set. Every battle uses these rules; spirits differ by element, health and their own abilities.
 -- All numbers here are PLACEHOLDERS to be tuned in playtests.
 local D = {}
 
@@ -6,23 +6,53 @@ D.MaxEnergy = 10
 D.StartEnergy = 1
 D.TurnEnergy = 1 -- free energy each side gets at the end of every turn
 
--- kind: attack deals power x element multiplier. block cancels one incoming attack and refunds its own cost.
--- charge is free and gives energy.
+-- kind: attack deals power x element multiplier. heal restores health. block cancels one incoming attack and refunds
+-- its own cost when it blocks. charge is free and gives energy.
+-- fx tells the client which effect to play: "lunge" (dash in and hit), "shot" (something flies over), "burst" (big hit
+-- that erupts around the target), "heal", "block", "charge". The look also follows the user's element.
 D.Moves = {
-	Charge = { name = "Charge", cost = 0, gain = 2, kind = "charge" },
-	Strike = { name = "Strike", cost = 2, power = 20, kind = "attack" },
-	Blast = { name = "Blast", cost = 5, power = 45, kind = "attack" },
-	Block = { name = "Block", cost = 1, kind = "block" },
+	Charge = { name = "Charge", cost = 0, gain = 2, kind = "charge", fx = "charge" },
+	-- Wood (Nature)
+	VineWhip = { name = "Vine Whip", cost = 2, power = 18, kind = "attack", fx = "lunge" },
+	Regrow = { name = "Regrow", cost = 3, heal = 25, kind = "heal", fx = "heal" },
+	LeafStorm = { name = "Leaf Storm", cost = 5, power = 45, kind = "attack", fx = "burst" },
+	-- Ember (Fire)
+	Fireball = { name = "Fireball", cost = 2, power = 18, kind = "attack", fx = "shot" },
+	FlameGuard = { name = "Flame Guard", cost = 1, kind = "block", fx = "block" },
+	Inferno = { name = "Inferno", cost = 5, power = 45, kind = "attack", fx = "burst" },
+	-- Pebble (Earth)
+	RockThrow = { name = "Rock Throw", cost = 2, power = 18, kind = "attack", fx = "shot" },
+	StoneWall = { name = "Stone Wall", cost = 1, kind = "block", fx = "block" },
+	Quake = { name = "Quake", cost = 5, power = 45, kind = "attack", fx = "burst" },
+	-- Breeze (Wind)
+	Gust = { name = "Gust", cost = 1, power = 12, kind = "attack", fx = "lunge" },
+	Twister = { name = "Twister", cost = 3, power = 28, kind = "attack", fx = "shot" },
+	Tempest = { name = "Tempest", cost = 5, power = 45, kind = "attack", fx = "burst" },
+	-- the old shared moves (2026-10-23 to 2026-10-27); no spirit uses them now
+	Strike = { name = "Strike", cost = 2, power = 20, kind = "attack", fx = "lunge" },
+	Blast = { name = "Blast", cost = 5, power = 45, kind = "attack", fx = "burst" },
+	Block = { name = "Block", cost = 1, kind = "block", fx = "block" },
 }
-D.MoveOrder = { "Charge", "Strike", "Blast", "Block" }
 
--- Test roster (battle stats only). Water is reserved for when a water spirit exists.
+-- Test roster (battle stats only). Every spirit also has Charge. Water is reserved for when a water spirit exists.
 D.Spirits = {
-	Wood = { element = "Nature", hp = 100 },
-	Ember = { element = "Fire", hp = 100 },
-	Pebble = { element = "Earth", hp = 100 },
-	Breeze = { element = "Wind", hp = 100 },
+	Wood = { element = "Nature", hp = 100, moves = { "VineWhip", "Regrow", "LeafStorm" } },
+	Ember = { element = "Fire", hp = 90, moves = { "Fireball", "FlameGuard", "Inferno" } },
+	Pebble = { element = "Earth", hp = 120, moves = { "RockThrow", "StoneWall", "Quake" } },
+	Breeze = { element = "Wind", hp = 85, moves = { "Gust", "Twister", "Tempest" } },
 }
+
+-- the 4 moves on a spirit's FIGHT page: Charge first, then its own 3
+function D.movesFor(name)
+	local s = D.Spirits[name]
+	local list = { "Charge" }
+	if s then for _, id in ipairs(s.moves) do table.insert(list, id) end end
+	return list
+end
+
+function D.canUse(name, id)
+	return table.find(D.movesFor(name), id) ~= nil
+end
 
 -- Strong[attackerElement] = elements it beats
 D.Strong = {
@@ -41,16 +71,19 @@ D.ElementColor = {
 }
 
 -- seconds each event takes to play (server and client both use D.eventTime so they stay in step).
--- Attacks and endings take their own time because each has its own animation (BattleFXPack effects).
-D.EventTime = { say = 0.45, fx = 0.45, hit = 0.6, blocked = 0.8, en = 0.2, reject = 0.4, ["end"] = 0.4, tame = 0.9 }
+-- The "used X!" line is short because the move's effect starts right with it (like the reference game).
+D.EventTime = { say = 0.2, hit = 1.0, heal = 1.0, blocked = 1.0, en = 0.2, reject = 0.4, ["end"] = 0.4, tame = 0.9 }
 D.FxTime = { charge = 0.9, block = 0.7 }
-D.HitTime = { Strike = 1.0, Blast = 1.5 }
+D.HitTime = { lunge = 1.0, shot = 1.3, burst = 1.9 } -- by the move's fx
 D.EndTime = { win = 2.4, lose = 1.8, tame = 1.2, run = 0.4 }
 D.TameTime = { ok = 4.4, fail = 4.0 }
 
 function D.eventTime(e)
-	if e.k == "fx" then return D.FxTime[e.type] or D.EventTime.fx end
-	if e.k == "hit" then return D.HitTime[e.move] or D.EventTime.hit end
+	if e.k == "fx" then return D.FxTime[e.type] or 0.45 end
+	if e.k == "hit" or e.k == "blocked" then
+		local m = e.move and D.Moves[e.move]
+		return (m and D.HitTime[m.fx]) or D.EventTime[e.k]
+	end
 	if e.k == "end" then return D.EndTime[e.result] or D.EventTime["end"] end
 	if e.k == "tame" then return e.ok and D.TameTime.ok or D.TameTime.fail end
 	return D.EventTime[e.k] or 0.3

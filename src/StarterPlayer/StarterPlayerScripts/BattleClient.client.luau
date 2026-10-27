@@ -71,7 +71,6 @@ end
 local canAct = false
 local curPage = "main"
 local state = nil
-local moveButtons = {}
 local function showPage(p)
 	curPage = p
 	for name, list in pairs(pages) do for _, b in ipairs(list) do b.Visible = (name == p) and canAct end end
@@ -92,21 +91,31 @@ local tameBtn = button("main", "TAME", cell(0, 2), UDim2.fromOffset(W * 2 + G, H
 		addMsg("Too strong to tame! Get its health to " .. math.floor(Data.Tame.Threshold * 100) .. "% or less.")
 	end
 end)
-local mi = 0
-for _, id in ipairs(Data.MoveOrder) do
-	local mv = Data.Moves[id]
-	local lbl = mv.name .. (mv.cost > 0 and ("  (" .. mv.cost .. ")") or ("  (+" .. (mv.gain or 0) .. ")"))
-	local col = (mv.kind == "attack") and Color3.fromRGB(190, 70, 50) or (mv.kind == "block" and Color3.fromRGB(60, 120, 190) or Color3.fromRGB(200, 160, 40))
-	local b = button("fight", lbl, cell(mi % 2, math.floor(mi / 2)), UDim2.fromOffset(W, H), col, function()
-		if canAct and state and state.myEn >= mv.cost then canAct = false; showPage("fight"); EvMove:FireServer(id) end
+-- the FIGHT page has 4 slots: Charge plus the spirit's own 3 moves (filled in when a battle starts)
+local moveSlots = {}
+for i = 1, 4 do
+	local slot = {}
+	slot.b = button("fight", "", cell((i - 1) % 2, math.floor((i - 1) / 2)), UDim2.fromOffset(W, H), Color3.fromRGB(110, 110, 110), function()
+		local mv = slot.id and Data.Moves[slot.id]
+		if mv and canAct and state and state.myEn >= mv.cost then canAct = false; showPage("fight"); EvMove:FireServer(slot.id) end
 	end)
-	moveButtons[id] = b; mi += 1
+	moveSlots[i] = slot
 end
+local KIND_COLOR = { attack = Color3.fromRGB(190, 70, 50), block = Color3.fromRGB(60, 120, 190), heal = Color3.fromRGB(60, 160, 90), charge = Color3.fromRGB(200, 160, 40) }
+local function setMoves(list)
+	for i, slot in ipairs(moveSlots) do
+		local mv = list[i] and Data.Moves[list[i]]
+		slot.id = mv and list[i] or nil
+		slot.b.Text = mv and (mv.name .. ((mv.cost > 0) and ("  (" .. mv.cost .. ")") or ("  (+" .. (mv.gain or 0) .. ")"))) or ""
+		slot.b.BackgroundColor3 = mv and KIND_COLOR[mv.kind] or Color3.fromRGB(110, 110, 110)
+	end
+end
+setMoves(Data.movesFor("Wood"))
 button("fight", "BACK", cell(0, 2), UDim2.fromOffset(W * 2 + G, H), Color3.fromRGB(80, 80, 80), function() showPage("main") end)
 local function refreshMoves()
-	for id, b in pairs(moveButtons) do
-		local ok = state and state.myEn >= Data.Moves[id].cost
-		b.TextTransparency = ok and 0 or 0.6; b.BackgroundTransparency = ok and 0 or 0.5
+	for _, slot in ipairs(moveSlots) do
+		local ok = slot.id and state and state.myEn >= Data.Moves[slot.id].cost
+		slot.b.TextTransparency = ok and 0 or 0.6; slot.b.BackgroundTransparency = ok and 0 or 0.5
 	end
 	local ch = state and Data.tameChance(state.foeHp, state.foeMax) or 0
 	tameBtn.Text = (ch > 0) and ("TAME  (" .. math.floor(ch * 100 + 0.5) .. "% chance)") or ("TAME  (needs " .. math.floor(Data.Tame.Threshold * 100) .. "% HP or less)")
@@ -205,6 +214,9 @@ local Pack = RS:WaitForChild("BattleFXPack")
 local FX = require(Pack:WaitForChild("FX"))
 local PackMoves = require(Pack:WaitForChild("Moves"))
 local Rig = require(RS:WaitForChild("SpiritRig"))
+local MoveFX = require(RS:WaitForChild("BattleMoveFX"))
+local FX_FOV = 55
+FX.BoltScale = 0.6 -- the pack's bolts are too big up close
 
 local motion = {} -- "me" / "foe" -> { model, home, off, rig, frozen, seed }
 local camBase, camPunch, camShake = nil, 0, 0
@@ -250,13 +262,50 @@ local function punch(studs, t, shake)
 	end)
 end
 
+-- camera shots (example from the reference game: your spirit big in the lower-left foreground, the camera cuts per action)
+local function shot(name)
+	local me, foe = motion.me, motion.foe
+	if not me or not foe then return cam.CFrame end
+	local my, fo = me.home.Position, foe.home.Position
+	local flat = (fo - my) * Vector3.new(1, 0, 1)
+	local d = flat.Magnitude
+	local dir = flat.Unit
+	local right = dir:Cross(Vector3.new(0, 1, 0))
+	local up = Vector3.new(0, 1, 0)
+	if name == "foe" then -- from beside your spirit to the foe, while the foe acts
+		return CFrame.lookAt(my + dir * 6 + right * 6 + up * 3, fo + up)
+	elseif name == "onFoe" then -- low and close on the foe, for big hits on it
+		return CFrame.lookAt(fo - dir * 16 - right * 6 + up * 2.5, fo + up * 3)
+	elseif name == "onMe" then -- facing your spirit, for big hits on it
+		return CFrame.lookAt(my + dir * 16 + right * 6 + up * 2.5, my + up * 3)
+	end
+	-- main: low, behind and well to the right of your spirit, so it sits big in the lower-left and the foe upper-right
+	return CFrame.lookAt(my - dir * 8.5 + right * 12.75 + up * 4, my + dir * 4.75 + right * 2.6 + up * 2)
+end
+local function cut(name) camBase = shot(name) end
+
+-- energy shown as lightning bolts orbiting each spirit (example from the reference game); spending makes them fly off
+local function setBolts(who, n)
+	local mo = motion[who]
+	if not mo or not mo.bolts then return end
+	n = math.clamp(n or 0, 0, Data.MaxEnergy)
+	if n > mo.shown then
+		mo.bolts:Add(n - mo.shown)
+	elseif n < mo.shown then
+		local h = mo.bolts
+		task.spawn(function() h:Consume(); h:Add(n) end)
+	end
+	mo.shown = n
+end
+
 local function startMotion()
 	motion = {}
 	for _, who in ipairs({ "me", "foe" }) do
 		local m = stageModel(who)
 		if m then
 			local ok, r = pcall(Rig.new, m)
-			motion[who] = { model = m, home = m:GetPivot(), off = CFrame.new(), rig = ok and r or nil, frozen = false, seed = math.random() * 10 }
+			motion[who] = { model = m, home = m:GetPivot(), off = CFrame.new(), rig = ok and r or nil, frozen = false, seed = math.random() * 10,
+				bolts = FX.Charge(m, 0), shown = 0 }
 		end
 	end
 	if loopConn then loopConn:Disconnect() end
@@ -282,6 +331,7 @@ end
 
 local function stopMotion()
 	if loopConn then loopConn:Disconnect(); loopConn = nil end
+	for _, mo in pairs(motion) do if mo.bolts then mo.bolts:Destroy() end end
 	motion = {}
 	camBase, camPunch, camShake = nil, 0, 0
 	catchBox = nil
@@ -338,7 +388,7 @@ local function hitFx(def, color, dmg, mult, power)
 	local d = motion[def]
 	if not d then return end
 	FX.HitFlash(d.model, 0.2)
-	burstAt(center(d.model), color, power)
+	burstAt(center(d.model), color, math.min(power, 1.2)) -- bigger flash balls hid the target
 	FX.DamageNumber(d.model, dmg, (mult > 1) and Color3.fromRGB(255, 200, 0) or ((mult < 1) and Color3.fromRGB(205, 205, 205) or nil))
 	punch(1.5 * power, 0.35, (mult > 1) and 0.7 or 0.25 * power)
 	if mult > 1 then pop("SUPER EFFECTIVE!", Color3.fromRGB(255, 205, 40)) elseif mult < 1 then pop("not very effective", Color3.fromRGB(210, 210, 210)) end
@@ -367,67 +417,59 @@ end
 local function chargeFx(who)
 	local mo = motion[who]
 	if not mo then return end
-	local h = FX.Charge(mo.model, 0)
-	h:Add(3)
-	FX.Sparkle(center(mo.model), 30)
+	MoveFX.ChargeFlash(mo.model)
 	enPop(who, "+" .. Data.Moves.Charge.gain)
-	task.delay(0.55, function() h:Consume(); h:Destroy() end)
 end
 
--- Strike: wind up, lunge most of the way, slash marks in the element colour, spring back
-local function strike(att, def, color, dmg, mult, blocked)
+-- lunge: wind up, dash most of the way, the element bursts on the target, spring back
+local function lungeMove(att, def, color, el, dmg, mult, blocked)
 	local a, d = motion[att], motion[def]
 	if not a or not d then return end
 	local gap = (d.home.Position - a.home.Position).Magnitude
 	lerpOff(a, CFrame.new(0, 0, 0.9), 0.12)
-	lerpOff(a, CFrame.new(0, 0.5, -gap * 0.55), 0.14)
-	local hitPos = center(d.model)
-	if blocked then shieldHit(def) else hitFx(def, color, dmg, mult, 1) end
-	local face = CFrame.lookAt(hitPos, cam.CFrame.Position)
-	for i = -1, 1 do
-		local s = tmp(Vector3.new(0.4, 6, 0.4), (i == 0) and Color3.new(1, 1, 1) or color, face * CFrame.Angles(0, 0, math.rad(35 * i + 20)))
-		TS:Create(s, TweenInfo.new(0.3), { Transparency = 1, Size = Vector3.new(0.05, 8, 0.05) }):Play()
-	end
+	lerpOff(a, CFrame.new(0, 0.5, -gap * 0.6), 0.13)
+	if blocked then shieldHit(def) else MoveFX.Impact(d.model, el, color); hitFx(def, color, dmg, mult, 1) end
 	task.wait(0.2)
 	lerpOff(a, CFrame.new(), 0.25)
 end
 
--- Blast: an orb grows in the element colour, arcs over and explodes with a flash
-local function blast(att, def, color, dmg, mult, blocked)
+-- shot: the user gathers power and leans back, the element shot arcs over and lands
+local function shotMove(att, def, color, el, dmg, mult, blocked)
 	local a, d = motion[att], motion[def]
 	if not a or not d then return end
-	local from = center(a.model) + Vector3.new(0, 1.5, 0)
-	local orb = tmp(Vector3.new(0.5, 0.5, 0.5), color, CFrame.new(from), Enum.PartType.Ball)
-	TS:Create(orb, TweenInfo.new(0.3, Enum.EasingStyle.Back), { Size = Vector3.new(2.8, 2.8, 2.8) }):Play()
+	task.spawn(MoveFX.WindUp, a.model, el, color, 0.3)
 	lerpOff(a, CFrame.new(0, 0, 0.8), 0.3)
 	task.spawn(function() lerpOff(a, CFrame.new(0, 0, -1.4), 0.08); lerpOff(a, CFrame.new(), 0.25) end)
-	local to = center(d.model)
-	local mid = (from + to) * 0.5 + Vector3.new(0, 7, 0)
-	local t0 = os.clock()
-	while true do
-		local f = math.clamp((os.clock() - t0) / 0.5, 0, 1)
-		orb.Position = (1 - f) ^ 2 * from + 2 * (1 - f) * f * mid + f ^ 2 * to
-		if math.random() < 0.6 then
-			local tr = tmp(Vector3.new(1.2, 1.2, 1.2), color, CFrame.new(orb.Position), Enum.PartType.Ball, 0.3)
-			TS:Create(tr, TweenInfo.new(0.3), { Size = Vector3.new(0.1, 0.1, 0.1), Transparency = 1 }):Play()
-		end
-		if f >= 1 then break end
-		RunService.RenderStepped:Wait()
-	end
-	orb:Destroy()
-	if blocked then shieldHit(def) else
-		screenFlash()
-		hitFx(def, color, dmg, mult, 1.6)
-		FX.SparkleRain(to, 0.8)
-	end
-	task.wait(0.35)
+	MoveFX.Shot(a.model, d.model, el, color, function()
+		if blocked then shieldHit(def) else MoveFX.Impact(d.model, el, color); hitFx(def, color, dmg, mult, 1.3) end
+	end)
 end
+
+-- burst: the user gathers power, the camera cuts to the target, and the element erupts all around it
+local function burstMove(att, def, color, el, dmg, mult, blocked)
+	local a, d = motion[att], motion[def]
+	if not a or not d then return end
+	task.spawn(function() lerpOff(a, CFrame.new(0, 1.2, 0), 0.15); lerpOff(a, CFrame.new(), 0.2) end)
+	MoveFX.WindUp(a.model, el, color, 0.35)
+	task.wait(0.35)
+	cut((def == "foe") and "onFoe" or "onMe")
+	if blocked then shieldHit(def) else
+		MoveFX.Eruption(d.model, el, color, 1)
+		screenFlash()
+		hitFx(def, color, dmg, mult, 2)
+	end
+	task.wait(1.1)
+	cut("main")
+end
+
+local MOVE_FN = { lunge = lungeMove, shot = shotMove, burst = burstMove }
 
 -- knocked out: tip over; a defeated wild spirit then rises, fades and bursts into sparkles
 local function faintFx(who, vanish)
 	local mo = motion[who]
 	if not mo then return end
 	mo.frozen = true
+	if mo.bolts then mo.bolts:Destroy(); mo.bolts = nil end
 	FX.HitFlash(mo.model, 0.3)
 	if mo.model:FindFirstChild("Orb") then
 		-- a ball looks the same tipped over, so a placeholder orb drops onto its platform instead
@@ -493,7 +535,8 @@ end
 local function introFx(foeName)
 	local me, foe = motion.me, motion.foe
 	if not me or not foe then return end
-	local mainCF = cam.CFrame
+	cam.FieldOfView = FX_FOV
+	local mainCF = shot("main")
 	local fpos = center(foe.model)
 	local dir = ((fpos - center(me.model)) * Vector3.new(1, 0, 1)).Unit
 	me.frozen = true
@@ -535,6 +578,7 @@ local function playEventFx(e)
 	local who = e.who
 	if e.k == "say" then
 		addMsg(e.text, who)
+		cut((who == "foe") and "foe" or "main")
 		local mv = e.move and Data.Moves[e.move]
 		if mv and mv.cost > 0 then enPop(who, "-" .. mv.cost, Color3.fromRGB(255, 120, 80)) end
 	elseif e.k == "reject" then
@@ -545,10 +589,17 @@ local function playEventFx(e)
 		local att = (e.k == "hit") and who or e.by
 		local def = (att == "me") and "foe" or "me"
 		local el = (att == "me") and state.myEl or state.foeEl
-		local fn = (e.move == "Blast") and blast or strike
-		task.spawn(fn, att, def, Data.ElementColor[el] or Color3.new(1, 1, 1), e.dmg, e.mult or 1, e.k == "blocked")
+		local mv = Data.Moves[e.move]
+		local fn = MOVE_FN[mv and mv.fx] or lungeMove
+		task.spawn(fn, att, def, Data.ElementColor[el] or Color3.new(1, 1, 1), el, e.dmg, e.mult or 1, e.k == "blocked")
 		if e.k == "hit" then
 			if e.mult > 1 then addMsg("It's super effective!") elseif e.mult < 1 then addMsg("Not very effective...") end
+		end
+	elseif e.k == "heal" then
+		local mo = motion[who]
+		if mo then
+			MoveFX.Heal(mo.model)
+			FX.DamageNumber(mo.model, -(e.amt or 0), Color3.fromRGB(90, 235, 110))
 		end
 	elseif e.k == "tame" then
 		task.spawn(tameFx, e.ok)
@@ -596,8 +647,8 @@ local function playEventOld(e)
 	end
 end
 
--- health bars drop when the hit lands, not when the move starts
-local IMPACT = { Strike = 0.26, Blast = 0.85 }
+-- health bars drop when the hit lands, not when the move starts (seconds after the hit event, by the move's fx)
+local IMPACT = { lunge = 0.25, shot = 0.8, burst = 0.35 }
 
 local playing = false
 local function playEvents(evs)
@@ -605,15 +656,18 @@ local function playEvents(evs)
 	local ended = false
 	for _, e in ipairs(evs) do
 		if USE_FX_PACK and e.k == "hit" then
-			task.delay(IMPACT[e.move] or 0, applySnap, e.s)
+			local mv = Data.Moves[e.move]
+			task.delay(IMPACT[mv and mv.fx] or 0, applySnap, e.s)
 		else
 			applySnap(e.s)
 		end
+		if USE_FX_PACK and e.s then setBolts("me", e.s.myEn); setBolts("foe", e.s.foeEn) end
 		if e.k == "end" then ended = true end
 		if USE_FX_PACK then playEventFx(e) else playEventOld(e) end
 		task.wait(Data.eventTime(e))
 	end
 	playing = false
+	if USE_FX_PACK and not ended then cut("main") end
 	if not ended then canAct = true; showPage("main"); refreshMoves() end
 end
 
@@ -634,9 +688,11 @@ EvStart.OnClientEvent:Connect(function(info)
 	hud.Visible = true
 	hideOtherGuis(true)
 	applySnap(info.s)
+	setMoves(info.myMoves or Data.movesFor("Wood"))
 	if USE_FX_PACK then
 		startMotion()
 		introFx(info.foeName)
+		setBolts("me", state.myEn); setBolts("foe", state.foeEn)
 	else
 		tweenFade(1, 0.3)
 		addMsg("A wild " .. info.foeName .. " has appeared!", "foe")
