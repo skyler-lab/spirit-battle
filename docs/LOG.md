@@ -2,6 +2,7 @@
 
 ## Decisions (approved / rejected)
 One line each, newest first. Dates are when Don decided; "reported 2026-10-24" means Don told Claude on that date and the decision date is not recorded.
+- 2026-10-27: battles after the faster pacing REJECTED as still "not good, we could do so much better". Reason: speed alone did not fix the feel.
 - 2026-10-24: background runs (including /morning) move to RobloxStudio\spirit-battle APPROVED. Reason: one working copy for all spirit battle work.
 - 2026-10-24: use of the four studio skills (ui-principles, model-building, studio-mcp-lessons, verification) APPROVED. Reason: Don reviewed the vetted list; plain text, nothing risky.
 - Reported 2026-10-24: playtest verdict "slow and boring, nothing felt good". Reason: battle effects and animation are missing.

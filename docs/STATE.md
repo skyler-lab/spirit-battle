@@ -90,7 +90,7 @@ Place contents (Studio, 2026-10-23, after the home island): Workspace has Basepl
 
 ## Open tasks (priority order)
 1. Ask Don what to do with the EV_ parts in Workspace. Placeholder orbs look odd (neon, floating); fine until real models exist.
-2. Battle feel (Don's playtest: slow and boring). Pacing sped up 2026-10-27; waiting for Don's feel check. BattleFXPack is NOT to be connected yet: the chat building it isn't finished. Wait for it, then wire it into BattleClient and test effects, win and faint.
+2. Battle feel (Don's playtest: slow and boring). Pacing sped up 2026-10-27; Don: still "not good, we could do so much better". BattleFXPack is NOT to be connected yet: the chat building it isn't finished. Wait for it, then wire it into BattleClient and test effects, win and faint.
 3. Pick which owned spirit fights (BattleSpirit is still always Wood) and a real team/inventory UI.
 4. Home island: decide on the blank sign boards. Then plan what "home customizing" means and the art list in docs/HOME-BASE-PLAN.md.
 5. Remove or retire the storm-era scripts and the old HUD once nothing depends on them. Do not delete without Don's OK.
