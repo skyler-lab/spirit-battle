@@ -12,6 +12,14 @@ One line each, newest first. Dates are when Don decided; "reported 2026-10-24" m
 - 2026-10-23: Sell prompt on placed spirits KEPT. Reason: the economy is not designed yet.
 - 2026-10-23: storm turned OFF (disabled, not deleted). Reason: the pivot dropped it.
 
+## 2026-10-27: Faster battle pacing
+Request: speed up battle pacing now, without waiting for the effects pack.
+- BattleData.EventTime about halved (a turn about 2.5s instead of about 5.9s). Battle start wait 2.2s to 1.2s (client) and 2.6s to 1.6s (server).
+- Opened Place1 in Studio (it was closed); its 37 scripts matched src before the change.
+- Play test with real clicks: menu 1.9s after start, Charge turn 2.28s, Strike turn 2.60s, RUN clean, no errors.
+- Files: BattleData, BattleServer, BattleClient, docs.
+- Status: source committed; Studio check done; Don's approval waiting. Don to press Ctrl+S.
+
 ## 2026-10-24: Working copy and studio-skills
 Request: confirm both copies match, pick the working copy, clone studio-skills from skyler-lab if missing, list and vet every skill file before use.
 - Both copies point to github.com/skyler-lab/spirit-battle and are at commit 4715bb5.

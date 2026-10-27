@@ -41,7 +41,7 @@ D.ElementColor = {
 }
 
 -- seconds each event type takes to play (server and client both use this so they stay in step)
-D.EventTime = { say = 1.3, fx = 0.9, hit = 1.0, blocked = 0.9, en = 0.35, reject = 0.4, ["end"] = 0.4, tame = 1.4 }
+D.EventTime = { say = 0.55, fx = 0.45, hit = 0.6, blocked = 0.5, en = 0.2, reject = 0.4, ["end"] = 0.4, tame = 0.9 }
 
 -- Taming (PLACEHOLDERS). TAME only works when the wild spirit's health is at or below Threshold (fraction of max).
 -- Chance scales linearly from ChanceAtThreshold (at exactly Threshold) up to ChanceAtZero (as health nears 0).

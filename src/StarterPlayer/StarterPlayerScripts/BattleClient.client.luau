@@ -256,7 +256,7 @@ EvStart.OnClientEvent:Connect(function(info)
 	applySnap(info.s)
 	tweenFade(1, 0.3)
 	addMsg("A wild " .. info.foeName .. " has appeared!", "foe")
-	task.wait(2.2)
+	task.wait(1.2)
 	canAct = true; showPage("main"); refreshMoves()
 end)
 

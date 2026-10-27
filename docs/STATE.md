@@ -1,6 +1,6 @@
 # Spirit Battle: current state
 
-Last updated: 2026-10-24 (working copy set, studio-skills cloned)
+Last updated: 2026-10-27 (faster battle pacing)
 
 ## What it is
 Roblox Prodigy-style spirit battle game. Working name "Spirit Battle", final name TBD. "Storm Spirits" is the old name and the old design (5-minute storm rounds, grab spirits, deliver to base); that design is dropped. Owner: Don (Roblox user SkylerH007). Not published. Halloween 2026 target.
@@ -33,7 +33,7 @@ Reference game: "Catch a Brainrot". Copy its mechanics, pacing, flow and layout 
 
 ## How it is built
 Battle (the new game, built and partly tested):
-- `ReplicatedStorage.BattleData`: the one rule set. MaxEnergy 10, StartEnergy 1, +1 energy per turn each side. Moves: Charge (free, +2 energy), Strike (cost 2, 20 dmg), Block (cost 1, cancels one attack, refunds cost when it blocks), Blast (cost 5, 45 dmg). Tame (placeholders): works at or below 30% wild health; chance 25% at 30% health rising linearly to 90% near 0; `D.tameChance(hp, max)`; owned list cap 60. Test spirits Wood=Nature, Ember=Fire, Pebble=Earth, Breeze=Wind, 100 HP each. Elements: Fire>Nature>Earth>Wind>Fire, Water>Fire; 1.5x strong, 0.5x weak. EventTime table keeps server and client in step. All numbers are placeholders.
+- `ReplicatedStorage.BattleData`: the one rule set. MaxEnergy 10, StartEnergy 1, +1 energy per turn each side. Moves: Charge (free, +2 energy), Strike (cost 2, 20 dmg), Block (cost 1, cancels one attack, refunds cost when it blocks), Blast (cost 5, 45 dmg). Tame (placeholders): works at or below 30% wild health; chance 25% at 30% health rising linearly to 90% near 0; `D.tameChance(hp, max)`; owned list cap 60. Test spirits Wood=Nature, Ember=Fire, Pebble=Earth, Breeze=Wind, 100 HP each. Elements: Fire>Nature>Earth>Wind>Fire, Water>Fire; 1.5x strong, 0.5x weak. EventTime table keeps server and client in step; faster pacing since 2026-10-27: say 0.55, fx 0.45, hit 0.6, blocked 0.5, en 0.2, reject 0.4, end 0.4, tame 0.9 seconds (was 1.3, 0.9, 1.0, 0.9, 0.35, 0.4, 0.4, 1.4). All numbers are placeholders.
 - `ServerScriptService.BattleServer`: spawns wild spirits on `Workspace.TestArea` WildSpot parts (Species attribute). Walk within 9 studs: "!" for 0.9s, player frozen, battle starts. Server-authoritative turns, random foe AI, arena built per player far away (4000+, 300, 4000) as a Persistent Model. Remotes in `ReplicatedStorage.BattleRemotes` (Start, Events, End, Move). Win: wild despawns, respawns after 8s. Lose or run: 4s cooldown. Placeholder rules: double knockout is a player win; losing sends you to spawn with no penalty. Player's spirit is the player attribute BattleSpirit, default Wood. Sets player attribute InBattle while a battle runs (HealthServer, now disabled, skipped storm damage while it was set). TAME (move id "Tame"): server rejects it above the threshold; a failed try uses your turn and the wild spirit still acts; a success ends the battle ("You tamed X!"), removes the wild spirit like a win and appends its name to the player attribute OwnedSpirits. Studio-only test hooks (Workspace attributes, ignored outside Studio): TestFoeHpFrac (0 to 1, wild starting health) and TestTameForce ("success" or "fail"). Teleport pads: part with a ProximityPrompt and a Dest attribute.
 - `StarterPlayerScripts.BattleClient`: plain placeholder battle UI (foe panel, your panel with energy, message bars, FIGHT / BAG(soon) / TEAM(soon) / RUN, move page with costs, TAME button under the menu showing the live chance or "needs 30% HP or less"), fade, scripted camera (well behind and to the side of your spirit so both look closer in size, distances scale with the gap, FOV 40 in battle and restored after), simple effects, hides other HUDs during battle, uses RequestStreamAsync. Does NOT use BattleFXPack yet.
 - `ReplicatedStorage.BattleFXPack` (folder, v0.2, 2026-10-22, from the look-and-feel pass): asset-free battle presentation built from Parts in code. Modules: FX (effects), Moves (ability library), BattleCamera (shots), BattleDialog (typewriter dialog, toasts, energy pops, team XP, level-up), BattleMenu, BattlePlay, Sequencer (Entry, SendOut, Turn, Faint, Catch, Swap, Exit), README, Demo. Everything runs on the client. Not wired into BattleClient.
@@ -67,6 +67,7 @@ Place contents (Studio, 2026-10-23, after the home island): Workspace has Basepl
 
 ## Tested and untested
 - Don's playtest verdict (reported 2026-10-24): "slow and boring, nothing felt good", because battle effects and animation are missing.
+- Faster pacing tested in Play 2026-10-27 with real mouse clicks (no test switches, wild Ember): battle start to menu 1.9s; a Charge turn 2.28s; a two-hit Strike turn 2.60s (was about 5.9s); RUN ended the battle cleanly; damage math unchanged; messages still readable. Not checked: how it feels to Don.
 - Tested and working: battle entry, menu, turns, energy, rejection when energy is too low, element math (Wood Strike did 10 to Ember, Ember Strike did 30 to Wood), lose flow back to spawn. Save and load through TestRejoin.
 - Taming tested 2026-10-23 in Play with the test hooks (Pebble at 20% health, 47% chance shown): a forced fail used the turn and Pebble acted; energy went up by 1 at turn end; a forced success ended the battle with "You tamed Pebble!" and the list showed Pebble; after TestRejoin the list still showed Pebble. The random roll itself (no hook) was not exercised.
 - Not tested: win ending, whether effects are visible on screen, the BattleFXPack sequences inside a real battle, the TAME reject message above 30%.
@@ -89,7 +90,7 @@ Place contents (Studio, 2026-10-23, after the home island): Workspace has Basepl
 
 ## Open tasks (priority order)
 1. Ask Don what to do with the EV_ parts in Workspace. Placeholder orbs look odd (neon, floating); fine until real models exist.
-2. Battle feel (Don's playtest: slow and boring). BattleFXPack is NOT to be connected yet: the chat building it isn't finished. Wait for it, then wire it into BattleClient and test effects, win and faint.
+2. Battle feel (Don's playtest: slow and boring). Pacing sped up 2026-10-27; waiting for Don's feel check. BattleFXPack is NOT to be connected yet: the chat building it isn't finished. Wait for it, then wire it into BattleClient and test effects, win and faint.
 3. Pick which owned spirit fights (BattleSpirit is still always Wood) and a real team/inventory UI.
 4. Home island: decide on the blank sign boards. Then plan what "home customizing" means and the art list in docs/HOME-BASE-PLAN.md.
 5. Remove or retire the storm-era scripts and the old HUD once nothing depends on them. Do not delete without Don's OK.

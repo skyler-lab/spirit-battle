@@ -198,7 +198,7 @@ local function startBattle(player, w)
 		stage = b.stage.Name, pos = b.stage:GetAttribute("Pos"), myName = myName, foeName = foeName, myEl = b.myEl, foeEl = b.foeEl,
 		myMax = b.myMax, foeMax = b.foeMax, s = snap(b),
 	})
-	task.delay(2.6, function() if battles[player] == b then b.ready = true end end)
+	task.delay(1.6, function() if battles[player] == b then b.ready = true end end)
 end
 
 local function totalTime(evs)
