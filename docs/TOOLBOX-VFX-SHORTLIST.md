@@ -33,3 +33,18 @@ Plan once Don picks:
 - Packs from deleted accounts may be re-uploads of someone else's work. Pack A's description says "No scripts", but that is unverified.
 - Toolbox effects are usually anime style: glowy, flashy and particle-heavy. The reference game uses flat, outlined cartoon shapes, so we would recolour and simplify them.
 - None of these packs has a jaw, a rocket or a big vine, so those single big effect objects would still need to be made.
+
+## Test results (2026-10-28)
+Tested in a separate empty place, `OneDrive\Documents\ChatGPT\Roblox team\work\vfx-test\VFX_TEST.rbxlx`, not Place1. Screenshots are in docs/img/vfx-test/. Each effect was fired on a spirit-sized dummy block, the way a battle would use it.
+
+| Pack | Scripts | Result | Verdict |
+|---|---|---|---|
+| A (179 items) | **4 hidden "Runtime" scripts, each with a 35,000-character screen builder, text boxes and remote functions. They run only in Studio, after a random delay, and install a hidden screen.** Its description says "No scripts". | Deleted all its scripts and screens in the test place. The shapes underneath (spike crowns, rings, crescents, swirls) are exactly the reference style. | **Rejected: backdoor.** Don't use the asset. The shapes are the right kind of art, made elsewhere. |
+| B (Euphoric Games) | None | 281 particle emitters. **"Big" set:** Explosion (bold cartoon flames), Tornado (wind rings and a white flash), Lightning (cyan bolt with a ground ring) all look good at spirit scale. **"Anime" set (36 small effects):** too small to see at battle distance as they are. | **Best pick.** Use the Big set, and scale up the Anime set. |
+| C (Light Explosion) | None | One explosion about 96 studs tall. It fills the whole screen and is realistic, not cartoon. | Only scaled way down, as a finisher at most. |
+| E (tornado.vfx) | None | Nothing shows. The effect seems to need an animation script it doesn't include. | Rejected: doesn't work as is. |
+| G (Lightning) | None | Thin neon stick lightning made of 66 plain parts. | Rejected: the "made of shapes" look Don dislikes. |
+
+Notes:
+- The test place still holds the packs, with A's scripts removed. It was never saved. Close it without saving.
+- Nothing was put in Place1.

@@ -25,6 +25,12 @@ One line each, newest first. Dates are when Don decided; "reported 2026-10-24" m
 - 2026-10-23: Sell prompt on placed spirits KEPT. Reason: the economy is not designed yet.
 - 2026-10-23: storm turned OFF (disabled, not deleted). Reason: the pivot dropped it.
 
+## 2026-10-28: Toolbox VFX test (A, B, C, E, G)
+Request: "Test packs A, B, C, E and G in a separate empty place and show me screenshots."
+- Made an empty test place (workfx-test\VFX_TEST.rbxlx) and inserted the 5 packs. Fired each effect on a dummy in Play.
+- A has a hidden Studio-only backdoor (4 Runtime scripts) despite saying "No scripts": rejected, scripts deleted in the test place. B is clean and its Big Explosion, Tornado and Lightning look good. C is far too big. E shows nothing. G is stick lightning.
+- Results added to docs/TOOLBOX-VFX-SHORTLIST.md, screenshots in docs/img/vfx-test/. Nothing put in Place1.
+
 ## 2026-10-28: Toolbox VFX search
 Request: "Search the Toolbox for free VFX packs and show me a list to pick from."
 - Searched the Creator Store (free) for VFX packs plus lightning, water, explosion, leaf, tornado, fire and hit effects. Looked at 20 thumbnails.
