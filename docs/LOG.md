@@ -2,6 +2,7 @@
 
 ## Decisions (approved / rejected)
 One line each, newest first. Dates are when Don decided; "reported 2026-10-24" means Don told Claude on that date and the decision date is not recorded.
+- 2026-10-28: Toolbox first as the source for effect art APPROVED. Reason: Don asked to search it for free VFX packs.
 - 2026-10-28: fight step 2 (stripped back) REJECTED. Reason: attacks just move forward and do damage, with no animation, attack or hit effect; Don says Claude focuses on layout instead of the attacks, movement and abilities in the video.
 - 2026-10-28: battle intro effects (sparkles and puffs when spirits appear) REJECTED. Reason: "it sucks", must go.
 - 2026-10-28: all 4 rule fixes in FIGHT-RULES.md APPROVED (start energy 2, test Wood vs Breeze first, foe shows a hint before its big attack, watch Charge). Reason: Don said "sure".
@@ -23,6 +24,12 @@ One line each, newest first. Dates are when Don decided; "reported 2026-10-24" m
 - 2026-10-23: home base is an island APPROVED (built with plain parts). Reason: Don's choice for the home base map.
 - 2026-10-23: Sell prompt on placed spirits KEPT. Reason: the economy is not designed yet.
 - 2026-10-23: storm turned OFF (disabled, not deleted). Reason: the pivot dropped it.
+
+## 2026-10-28: Toolbox VFX search
+Request: "Search the Toolbox for free VFX packs and show me a list to pick from."
+- Searched the Creator Store (free) for VFX packs plus lightning, water, explosion, leaf, tornado, fire and hit effects. Looked at 20 thumbnails.
+- Wrote docs/TOOLBOX-VFX-SHORTLIST.md (10 picks, A to J, with links and risks) and saved docs/img/toolbox-vfx-thumbnails.jpg.
+- Nothing inserted. Open: Don picks; picks get checked for scripts in a separate test place first.
 
 ## 2026-10-28: Reference attack breakdown
 Request: "do the frame-by-frame breakdown of the video's attacks first."
