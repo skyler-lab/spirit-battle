@@ -17,6 +17,15 @@ Status: PLAN ONLY. Nothing gets built until Don approves each step.
 - Each step changes only one layer: rules, feel, or looks.
 - A step is done when you say it is better, not when I say so.
 
+## Art rules (Don, 2026-10-28)
+- No effects, icons or spirits made out of plain shapes. Don: the shape-built +2 charge lightning "looks terrible".
+- Effects use real VFX: textured particles, beams, trails, flipbook images, glow.
+- Where images come from:
+  - Toolbox VFX and animations, checked for hidden scripts. Don OKs each one before it goes in.
+  - Images Don makes in ChatGPT. Claude can't use ChatGPT, so Claude writes the prompts; Don uploads with Asset Manager.
+  - Studio's own texture generator.
+- Every move gets a body animation, an attack effect, a screen effect (zoom, cut, shake, freeze) and a sound. See docs/FIGHT-RULES.md section E.
+
 ## Steps
 1. **Rules on paper.** One page: the moves, energy, what each choice does, and one example fight turn by turn. You read it and say yes or change it. No building.
 2. **Strip it back.** One fight only: Wood vs Ember. Turn off the extra effects, keep the camera simple. Make sure the turns are clear and fast.
