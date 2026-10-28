@@ -2,6 +2,7 @@
 
 ## Decisions (approved / rejected)
 One line each, newest first. Dates are when Don decided; "reported 2026-10-24" means Don told Claude on that date and the decision date is not recorded.
+- 2026-10-28: build one full attack in Place1 with pack B's effects APPROVED. Reason: Don asked for it so he can play it.
 - 2026-10-28: Toolbox first as the source for effect art APPROVED. Reason: Don asked to search it for free VFX packs.
 - 2026-10-28: fight step 2 (stripped back) REJECTED. Reason: attacks just move forward and do damage, with no animation, attack or hit effect; Don says Claude focuses on layout instead of the attacks, movement and abilities in the video.
 - 2026-10-28: battle intro effects (sparkles and puffs when spirits appear) REJECTED. Reason: "it sucks", must go.
@@ -24,6 +25,13 @@ One line each, newest first. Dates are when Don decided; "reported 2026-10-24" m
 - 2026-10-23: home base is an island APPROVED (built with plain parts). Reason: Don's choice for the home base map.
 - 2026-10-23: Sell prompt on placed spirits KEPT. Reason: the economy is not designed yet.
 - 2026-10-23: storm turned OFF (disabled, not deleted). Reason: the pivot dropped it.
+
+## 2026-10-28: Leaf Storm, first full attack with pack B
+Request: "build one full attack with pack B's effects in Place1 so I can play it."
+- Copied pack B's Big Tornado, Lightning and Explosion (no scripts) into ReplicatedStorage.BattleVFX; rest of the pack removed.
+- BattleClient: Wood's Leaf Storm has its own sequence (light dims, Wood crouches and spins up with a small green whirl, camera cuts to the target, green tornado and leaf specks, red flash, short freeze, shake, knockback, damage, back). Studio-only TestReplayMove switch replays it.
+- Play test with real clicks: 45 damage, no errors, light restored, turn about 3.5s. Fixes during test: white glare on wind-up, green tint washing out to white.
+- Open: Don's playtest. Ctrl+S. Other moves still use the plain step 2 look.
 
 ## 2026-10-28: Toolbox VFX test (A, B, C, E, G)
 Request: "Test packs A, B, C, E and G in a separate empty place and show me screenshots."

@@ -521,6 +521,90 @@ local function simpleMove(att, def, color, el, dmg, mult, blocked, fx)
 	lerpOff(a, CFrame.new(), 0.25)
 end
 
+-- Wood's Leaf Storm: the first full attack built from pack B's effects (ReplicatedStorage.BattleVFX, Toolbox, added 2026-10-28).
+-- Timing takes example from the reference game's Splash: the light dims while Wood spins up, the camera cuts to the target,
+-- a green leaf-wind tornado erupts on it with a red hit flash, a short freeze, shake, knockback and the damage number, then back.
+local VFX = RS:WaitForChild("BattleVFX")
+local LEAF = ColorSequence.new(Color3.fromRGB(70, 200, 40), Color3.fromRGB(20, 120, 30)) -- deep green: the glow brightens it
+local WIND_ONLY = { Windspin1 = true, Windspin2 = true, Windspin3 = true, Windspin4 = true, Windspin5 = true } -- no white flash
+local function vfxAt(name, pos, tint, scale)
+	local k = VFX[name]:Clone()
+	k.CFrame = CFrame.new(pos)
+	for _, d in ipairs(k:GetDescendants()) do
+		if d:IsA("ParticleEmitter") then
+			if tint then d.Color = tint end
+			if scale and scale ~= 1 then
+				local ks = {}
+				for _, p in ipairs(d.Size.Keypoints) do table.insert(ks, NumberSequenceKeypoint.new(p.Time, p.Value * scale, p.Envelope * scale)) end
+				d.Size = NumberSequence.new(ks)
+				d.Speed = NumberRange.new(d.Speed.Min * scale, d.Speed.Max * scale)
+			end
+		end
+	end
+	k.Parent = workspace
+	return k
+end
+-- burst the emitters again and again for dur seconds (only = names to use), then clean up
+local function pulse(k, dur, every, only)
+	task.spawn(function()
+		local t0 = os.clock()
+		while os.clock() - t0 < dur and k.Parent do
+			for _, d in ipairs(k:GetDescendants()) do
+				if d:IsA("ParticleEmitter") and (not only or only[d.Name]) then d:Emit(math.clamp(math.floor(d.Rate * every + 0.5), 1, 12)) end
+			end
+			task.wait(every)
+		end
+		Debris:AddItem(k, 2.5)
+	end)
+end
+local function darken(on)
+	local L = game:GetService("Lighting")
+	local cc = L:FindFirstChild("MoveCC")
+	if not cc then cc = Instance.new("ColorCorrectionEffect"); cc.Name = "MoveCC"; cc.Parent = L end
+	TS:Create(cc, TweenInfo.new(on and 0.3 or 0.4), { Brightness = on and -0.18 or 0, Saturation = on and -0.25 or 0, Contrast = on and 0.1 or 0 }):Play()
+end
+local function leafStorm(att, def, color, el, dmg, mult, blocked)
+	local a, d = motion[att], motion[def]
+	if not a or not d then return end
+	darken(true)
+	-- wind-up: crouch, then spin up and rise while a small green whirl gathers at its feet
+	pulse(vfxAt("Tornado-01", MoveFX.feet(a.model) + Vector3.new(0, 1, 0), LEAF, 0.5), 0.55, 0.12, WIND_ONLY)
+	lerpOff(a, CFrame.new(0, -0.5, 0.5), 0.12)
+	local t0 = os.clock()
+	while os.clock() - t0 < 0.45 do
+		local f = (os.clock() - t0) / 0.45
+		a.off = CFrame.new(0, 1.2 * f, 0) * CFrame.Angles(0, f * f * math.pi * 4, 0)
+		RunService.RenderStepped:Wait()
+	end
+	a.off = CFrame.new(0, 1.2, 0)
+	camBase = shot((def == "foe") and "onFoe" or "onMe")
+	task.wait(0.08)
+	if blocked then shieldHit(def) else
+		pulse(vfxAt("Tornado-01", MoveFX.feet(d.model) + Vector3.new(0, 1, 0), LEAF, 1.4), 0.9, 0.1)
+		pulse(vfxAt("Explosion-01", MoveFX.center(d.model), ColorSequence.new(Color3.fromRGB(120, 230, 80)), 1), 0.3, 0.1, { Specks1 = true })
+		a.frozen, d.frozen = true, true
+		hitFx(def, color, dmg, mult, 2)
+		task.wait(0.08)
+		a.frozen, d.frozen = false, false
+	end
+	lerpOff(a, CFrame.new(), 0.3)
+	task.wait(0.7)
+	cut("main")
+	darken(false)
+end
+-- moves with their own full sequence, and when their hit lands (seconds after the hit event)
+local SPECIAL = { LeafStorm = leafStorm }
+local SPECIAL_IMPACT = { LeafStorm = 0.65 }
+-- Studio-only test switch: set Workspace attribute TestReplayMove to a move id during a battle to replay its look (no damage)
+if game:GetService("RunService"):IsStudio() then
+	workspace:GetAttributeChangedSignal("TestReplayMove"):Connect(function()
+		local id = workspace:GetAttribute("TestReplayMove")
+		if id and SPECIAL[id] and state and motion.me then
+			task.spawn(SPECIAL[id], "me", "foe", Data.ElementColor[state.myEl] or Color3.new(1, 1, 1), state.myEl, 45, 1, false)
+		end
+	end)
+end
+
 local MOVE_FN = { lunge = lungeMove, shot = shotMove, burst = burstMove }
 
 -- knocked out: tip over; a defeated wild spirit then rises, fades and bursts into sparkles
@@ -650,7 +734,7 @@ local function playEventFx(e)
 		local def = (att == "me") and "foe" or "me"
 		local el = (att == "me") and state.myEl or state.foeEl
 		local mv = Data.Moves[e.move]
-		local fn = SIMPLE and simpleMove or MOVE_FN[mv and mv.fx] or lungeMove
+		local fn = SPECIAL[e.move] or (SIMPLE and simpleMove) or MOVE_FN[mv and mv.fx] or lungeMove
 		task.spawn(fn, att, def, Data.ElementColor[el] or Color3.new(1, 1, 1), el, e.dmg, e.mult or 1, e.k == "blocked", mv and mv.fx)
 		if e.k == "hit" then
 			if e.mult > 1 then addMsg("It's super effective!") elseif e.mult < 1 then addMsg("Not very effective...") end
@@ -726,7 +810,7 @@ local function playEvents(evs)
 	for _, e in ipairs(evs) do
 		if USE_FX_PACK and e.k == "hit" then
 			local mv = Data.Moves[e.move]
-			task.delay(IMPACT[mv and mv.fx] or 0, applySnap, e.s)
+			task.delay(SPECIAL_IMPACT[e.move] or IMPACT[mv and mv.fx] or 0, applySnap, e.s)
 		else
 			applySnap(e.s)
 		end
@@ -779,6 +863,7 @@ EvEnd.OnClientEvent:Connect(function(result)
 	tweenFade(0, 0.3)
 	hud.Visible = false
 	hideOtherGuis(false)
+	darken(false)
 	for _, c in ipairs(msgHolder:GetChildren()) do if c:IsA("Frame") then c:Destroy() end end
 	if USE_FX_PACK then
 		stopMotion()
