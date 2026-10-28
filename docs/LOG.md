@@ -2,6 +2,7 @@
 
 ## Decisions (approved / rejected)
 One line each, newest first. Dates are when Don decided; "reported 2026-10-24" means Don told Claude on that date and the decision date is not recorded.
+- 2026-10-28: reference-style fight (own abilities, camera cuts, bolts, element effects) REJECTED. Reason: Don played it: "it really needs work", and said Claude is trying to do things it can't; wants to plan calmly first.
 - 2026-10-27: follow the reference recordings for the fight (take example, not copy) instead of the written redesign plan APPROVED. Reason: Don said he had already shown how he wants it in the video.
 - 2026-10-27: fighting redesign before models APPROVED. Reason: Don said "Yes. Plan a redesign of the fighting first".
 - 2026-10-27: battles after the battle feel pass REJECTED: "it still sucks". Reason (Don): looks ugly, no models, boring to play, too slow, "the fighting sucks".
@@ -17,6 +18,12 @@ One line each, newest first. Dates are when Don decided; "reported 2026-10-24" m
 - 2026-10-23: home base is an island APPROVED (built with plain parts). Reason: Don's choice for the home base map.
 - 2026-10-23: Sell prompt on placed spirits KEPT. Reason: the economy is not designed yet.
 - 2026-10-23: storm turned OFF (disabled, not deleted). Reason: the pivot dropped it.
+
+## 2026-10-28: Fight plan v3
+Request: "lets plan out and chill and get this fighting thing done."
+- Wrote docs/FIGHT-PLAN-V3.md: why the last tries failed, what Claude can and can't do, 7 small steps (rules on paper, strip back to Wood vs Ember, one great hit, models, arena and menu, sound, then spread).
+- No game changes. Files: docs only.
+- Open: Don to approve step 1.
 
 ## 2026-10-27: Own abilities and reference-style fight
 Request: take example from Don's 4 recordings: the fighting, each ability, the screen and ability effects (not a copy).
