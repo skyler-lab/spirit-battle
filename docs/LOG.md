@@ -2,6 +2,8 @@
 
 ## Decisions (approved / rejected)
 One line each, newest first. Dates are when Don decided; "reported 2026-10-24" means Don told Claude on that date and the decision date is not recorded.
+- 2026-10-28: fight step 2 (stripped back) REJECTED. Reason: attacks just move forward and do damage, with no animation, attack or hit effect; Don says Claude focuses on layout instead of the attacks, movement and abilities in the video.
+- 2026-10-28: battle intro effects (sparkles and puffs when spirits appear) REJECTED. Reason: "it sucks", must go.
 - 2026-10-28: all 4 rule fixes in FIGHT-RULES.md APPROVED (start energy 2, test Wood vs Breeze first, foe shows a hint before its big attack, watch Charge). Reason: Don said "sure".
 - 2026-10-28: fight plan v3 APPROVED. Reason: Don said "yeah sure".
 - 2026-10-28: effects, icons and spirits made from plain shapes REJECTED. Reason: they look ugly (for example the +2 charge lightning); use real VFX, images (ChatGPT, Toolbox) and animations instead.
