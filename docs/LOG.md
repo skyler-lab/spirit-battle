@@ -24,6 +24,12 @@ One line each, newest first. Dates are when Don decided; "reported 2026-10-24" m
 - 2026-10-23: Sell prompt on placed spirits KEPT. Reason: the economy is not designed yet.
 - 2026-10-23: storm turned OFF (disabled, not deleted). Reason: the pivot dropped it.
 
+## 2026-10-28: Reference attack breakdown
+Request: "do the frame-by-frame breakdown of the video's attacks first."
+- Pulled frames at 5 per second from videos 2 and 3. Wrote docs/REFERENCE-ATTACK-BREAKDOWN.md: Charge, Splash, Bite, Firework, faint and coins, step by step.
+- Key finding: in the reference the creatures barely move; each attack is one big outlined effect object (jaws, rocket, geyser), plus a red target silhouette, camera cuts, shake and light changes.
+- No game changes. Open: Don to pick the image source for effect art.
+
 ## 2026-10-28: Fight step 2, stripped back
 Request: "Yes, start step 2 in Studio."
 - BattleData: StartEnergy 2, TestOnlyFoe = "Breeze", HintCost 5. BattleServer: wild spirit plans its move a turn ahead and warns before a big one. BattleClient: SIMPLE mode (no shape effects, bolts or camera cuts; Highlight glows).
