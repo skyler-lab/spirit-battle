@@ -1,6 +1,6 @@
 # Fight rules (step 1 of FIGHT-PLAN-V3, 2026-10-28)
 
-Status: ON PAPER, for Don to approve. All numbers are placeholders. Section A is how the game works now, checked against the code. Section D is my suggested changes, and none are made yet.
+Status: ON PAPER, for Don to approve. All numbers are placeholders. Section A is how the game works now, checked against the code. Section D is the fixes Don approved on 2026-10-28; they are not built yet.
 
 ## A. How a turn works now
 - Each side has health and energy. Energy goes from 0 to 10.
@@ -28,7 +28,7 @@ Status: ON PAPER, for Don to approve. All numbers are placeholders. Section A is
 - **Turn 3.** Wood's Regrow heals it to 98. Ember's Fireball: Wood is at 71.
 - **Result:** Wood loses this fight almost every time. Ember does 3 times Wood's damage.
 
-## D. Problems I see, with suggested fixes (not made)
+## D. Problems I see, with fixes (all 4 APPROVED by Don 2026-10-28, built in step 2)
 1. **Turn 1 is forced.** With 1 energy you can only Charge. Fix: start with 2 energy, so Vine Whip or Charge is a real choice on turn 1.
 2. **Wood vs Ember is unfair on purpose (element advantage).** That makes it a bad first test of whether fighting is fun. Fix: test with Wood vs Breeze first. Nature vs Wind is even.
 3. **Block is a guess.** A block wastes energy if the foe didn't attack. That is fine, but you can't read the foe. Fix: the wild spirit shows a hint before it acts (for example, it glows when it is about to use its big attack).

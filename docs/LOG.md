@@ -2,6 +2,7 @@
 
 ## Decisions (approved / rejected)
 One line each, newest first. Dates are when Don decided; "reported 2026-10-24" means Don told Claude on that date and the decision date is not recorded.
+- 2026-10-28: all 4 rule fixes in FIGHT-RULES.md APPROVED (start energy 2, test Wood vs Breeze first, foe shows a hint before its big attack, watch Charge). Reason: Don said "sure".
 - 2026-10-28: fight plan v3 APPROVED. Reason: Don said "yeah sure".
 - 2026-10-28: effects, icons and spirits made from plain shapes REJECTED. Reason: they look ugly (for example the +2 charge lightning); use real VFX, images (ChatGPT, Toolbox) and animations instead.
 - 2026-10-28: reference-style fight (own abilities, camera cuts, bolts, element effects) REJECTED. Reason: Don played it: "it really needs work", and said Claude is trying to do things it can't; wants to plan calmly first.
