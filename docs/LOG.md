@@ -22,6 +22,12 @@ One line each, newest first. Dates are when Don decided; "reported 2026-10-24" m
 - 2026-10-23: Sell prompt on placed spirits KEPT. Reason: the economy is not designed yet.
 - 2026-10-23: storm turned OFF (disabled, not deleted). Reason: the pivot dropped it.
 
+## 2026-10-28: Fight step 2, stripped back
+Request: "Yes, start step 2 in Studio."
+- BattleData: StartEnergy 2, TestOnlyFoe = "Breeze", HintCost 5. BattleServer: wild spirit plans its move a turn ahead and warns before a big one. BattleClient: SIMPLE mode (no shape effects, bolts or camera cuts; Highlight glows).
+- Play test with real clicks: full Wood vs Breeze fight to a win (6 turns, 3.1 to 3.4s each), warning fired before Tempest, no script errors. Screenshots in docs/img/fight-step2/.
+- Open: Wood has no block, so the warning gives it no counter. Don's playtest. Don must press Ctrl+S.
+
 ## 2026-10-28: Fight rules on paper (step 1)
 Request: start step 1; no shape-built effects; every move needs body animation, effect and screen effect.
 - Wrote docs/FIGHT-RULES.md: the current rules checked against the code, Wood and Ember moves, a real example fight, 4 suggested fixes, and a per-move design table.

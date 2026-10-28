@@ -28,7 +28,7 @@ Status: PLAN ONLY. Nothing gets built until Don approves each step.
 
 ## Steps
 1. **Rules on paper.** One page: the moves, energy, what each choice does, and one example fight turn by turn. You read it and say yes or change it. No building.
-2. **Strip it back.** One fight only: Wood vs Ember. Turn off the extra effects, keep the camera simple. Make sure the turns are clear and fast.
+2. **Strip it back.** BUILT 2026-10-28, waiting for Don's playtest. One fight only: Wood vs Ember. Turn off the extra effects, keep the camera simple. Make sure the turns are clear and fast.
 3. **One great hit.** Make a single attack feel strong: short freeze on impact, screen shake, the target gets knocked back, flash, damage number. You play it.
 4. **Models.** Pick how we get creatures (AI mesh tool, Toolbox, or an artist). Try it on Wood and Ember only. You judge them.
 5. **Arena and menu.** A real battle floor and backdrop, styled buttons. Placeholder art first, real art later.

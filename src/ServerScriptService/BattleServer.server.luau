@@ -54,7 +54,7 @@ end
 
 for _, spot in ipairs(area:GetChildren()) do
 	if spot.Name == "WildSpot" and spot:GetAttribute("Species") then
-		local w = { spot = spot, species = spot:GetAttribute("Species") }
+		local w = { spot = spot, species = Data.TestOnlyFoe or spot:GetAttribute("Species") }
 		table.insert(wilds, w)
 		spawnWild(w)
 	end
@@ -107,8 +107,16 @@ local function act(b, side, id, targetBlockCost, push)
 	end
 end
 
+-- the wild spirit decides its move one turn ahead, so it can warn before a big attack
+local function planFoe(b, push)
+	b.nextFoe = chooseFoe(b)
+	if push and Data.Moves[b.nextFoe].cost >= Data.HintCost then
+		push({ k = "hint", who = "foe", move = b.nextFoe, text = b.foeName .. " is gathering power!" })
+	end
+end
+
 local function resolve(b, myId)
-	local foeId = chooseFoe(b)
+	local foeId = b.nextFoe or chooseFoe(b)
 	local mm, fm = Data.Moves[myId], Data.Moves[foeId]
 	local evs = {}
 	local function push(e) e.s = snap(b); table.insert(evs, e) end
@@ -129,6 +137,7 @@ local function resolve(b, myId)
 	b.myEn = math.min(Data.MaxEnergy, b.myEn + Data.TurnEnergy)
 	b.foeEn = math.min(Data.MaxEnergy, b.foeEn + Data.TurnEnergy)
 	push({ k = "en" })
+	planFoe(b, push)
 	return evs, nil
 end
 
@@ -217,11 +226,13 @@ local function startBattle(player, w)
 	local frac = RunService:IsStudio() and workspace:GetAttribute("TestFoeHpFrac")
 	if type(frac) == "number" and frac > 0 and frac <= 1 then b.foeHp = math.max(1, math.floor(b.foeMax * frac)) end
 	b.myEn, b.foeEn = Data.StartEnergy, Data.StartEnergy
+	local startHint
+	planFoe(b, function(e) startHint = e.text end)
 	b.stage = buildStage(player, myName, foeName)
 	b.starting = false
 	EvStart:FireClient(player, {
 		stage = b.stage.Name, pos = b.stage:GetAttribute("Pos"), myName = myName, foeName = foeName, myEl = b.myEl, foeEl = b.foeEl,
-		myMax = b.myMax, foeMax = b.foeMax, s = snap(b), myMoves = Data.movesFor(myName),
+		myMax = b.myMax, foeMax = b.foeMax, s = snap(b), myMoves = Data.movesFor(myName), hint = startHint,
 	})
 	task.delay(1.6, function() if battles[player] == b then b.ready = true end end)
 end
@@ -267,13 +278,14 @@ local function tameTurn(player, b)
 	end
 	push({ k = "say", who = "foe", text = b.foeName .. " broke free!" })
 	-- the wild spirit's move (the player made no move, so nothing of theirs blocks)
-	local foeId = chooseFoe(b)
+	local foeId = b.nextFoe or chooseFoe(b)
 	b.foeEn -= Data.Moves[foeId].cost
 	act(b, "foe", foeId, nil, push)
 	if b.myHp <= 0 then push({ k = "end", result = "lose", text = b.myName .. " fainted!" }); return evs, "lose" end
 	b.myEn = math.min(Data.MaxEnergy, b.myEn + Data.TurnEnergy)
 	b.foeEn = math.min(Data.MaxEnergy, b.foeEn + Data.TurnEnergy)
 	push({ k = "en" })
+	planFoe(b, push)
 	return evs, nil
 end
 

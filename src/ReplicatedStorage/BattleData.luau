@@ -3,8 +3,12 @@
 local D = {}
 
 D.MaxEnergy = 10
-D.StartEnergy = 1
+D.StartEnergy = 2 -- 2 so turn 1 is a real choice (Don approved 2026-10-28)
 D.TurnEnergy = 1 -- free energy each side gets at the end of every turn
+-- step 2 test (2026-10-28): every wild spot spawns this spirit so the first fun test is an even fight (Wood vs Breeze).
+-- Set to nil to go back to each spot's own Species.
+D.TestOnlyFoe = "Breeze"
+D.HintCost = 5 -- the wild spirit shows a warning the turn before it uses a move costing this much or more
 
 -- kind: attack deals power x element multiplier. heal restores health. block cancels one incoming attack and refunds
 -- its own cost when it blocks. charge is free and gives energy.
@@ -72,7 +76,7 @@ D.ElementColor = {
 
 -- seconds each event takes to play (server and client both use D.eventTime so they stay in step).
 -- The "used X!" line is short because the move's effect starts right with it (like the reference game).
-D.EventTime = { say = 0.2, hit = 1.0, heal = 1.0, blocked = 1.0, en = 0.2, reject = 0.4, ["end"] = 0.4, tame = 0.9 }
+D.EventTime = { say = 0.2, hit = 1.0, heal = 1.0, blocked = 1.0, en = 0.2, hint = 0.6, reject = 0.4, ["end"] = 0.4, tame = 0.9 }
 D.FxTime = { charge = 0.9, block = 0.7 }
 D.HitTime = { lunge = 1.0, shot = 1.3, burst = 1.9 } -- by the move's fx
 D.EndTime = { win = 2.4, lose = 1.8, tame = 1.2, run = 0.4 }
